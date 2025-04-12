@@ -17,16 +17,46 @@
       height: auto;
       border-radius: 12px;
       box-shadow: 0 0 10px rgba(0,0,0,0.2);
+      transition: transform 0.3s;
+      cursor: pointer;
+    }
+    img:hover {
+      transform: scale(1.03);
     }
     h1 {
       color: #333;
+    }
+    .btn {
+      display: inline-block;
+      margin-top: 30px;
+      padding: 12px 24px;
+      font-size: 18px;
+      color: white;
+      background-color: #ff0000;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      text-decoration: none;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .btn:hover {
+      background-color: #cc0000;
     }
   </style>
 </head>
 <body>
   <h1>🎉 歡迎來到我的網站！</h1>
   <p>這是我在 GitHub Pages 建立的第一個網頁</p>
-  <img src="156.jpg" alt="我的圖片">
+
+  <!-- ✅ 點圖片跳轉 -->
+  <a href="https://example.com" target="_blank">
+    <img src="156.jpg" alt="我的圖片">
+  </a>
+
+  <!-- ✅ YouTube 按鈕 -->
+  <br>
+  <a class="btn" href="https://www.youtube.com/watch?v=dQw4w9WgXcQ" target="_blank">
+    ▶️ 點我看影片
+  </a>
 </body>
 </html>
-
