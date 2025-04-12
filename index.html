@@ -4,41 +4,60 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>點圖加入我的 LINE 群組</title>
+  <title>歡迎來到我的網站</title>
   <style>
     body {
-      background-color: #f9f9f9;
+      font-family: "Helvetica", sans-serif;
       text-align: center;
+      background-color: #f8f8f8;
       padding: 50px;
-      font-family: Arial, sans-serif;
-    }
-    h1 {
-      color: #00c300;
-      margin-bottom: 30px;
     }
     img {
-      max-width: 90%;
+      max-width: 80%;
       height: auto;
-      border-radius: 16px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      border-radius: 12px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.2);
+      transition: transform 0.3s;
       cursor: pointer;
-      transition: transform 0.2s ease;
     }
     img:hover {
       transform: scale(1.03);
     }
+    h1 {
+      color: #333;
+    }
+    .btn {
+      display: inline-block;
+      margin-top: 30px;
+      padding: 12px 24px;
+      font-size: 18px;
+      color: white;
+      background-color: #ff0000;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      text-decoration: none;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .btn:hover {
+      background-color: #cc0000;
+    }
   </style>
 </head>
 <body>
+  <h1>🎉 歡迎來到我的網站！</h1>
+  <p>這是我在 GitHub Pages 建立的第一個網頁</p>
 
-  <h1>📲 點圖片加入我的 LINE 群組</h1>
-
-  <!-- ✅ 把下面的 LINK 改成你的群組連結 -->
-  <a href="https://line.me/R/ti/g/Cvge2Hd_fD" target="_blank">
-    <img src="156.jpg" alt="點擊加入 LINE 群組">
+  <!-- ✅ 點圖片跳轉 -->
+  <a href="https://example.com" target="_blank">
+    <img src="156.jpg" alt="我的圖片">
   </a>
 
+  <!-- ✅ YouTube 按鈕 -->
+  <br>
+  <a class="btn" href="https://www.youtube.com/watch?v=dQw4w9WgXcQ" target="_blank">
+    ▶️ 點我看影片
+  </a>
 </body>
 </html>
-
 
