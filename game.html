@@ -105,9 +105,9 @@ function draw() {
 
   ctx.fillStyle = 'red';
   enemies.forEach(enemy => ctx.fillRect(enemy.x - 15, enemy.y - 15, 30, 30));
-
+  ctx.font = "30px Arial";  // 字體大小為 30px，字體類型為 Arial
   ctx.fillStyle = 'white';
-  ctx.fillText('Score: ' + score, 10, 30);
+  ctx.fillText('Score: ' + score, 10, 50);
 }
 
 function gameLoop() {
