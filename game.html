@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<title>手機模式遊戲範例</title>
+<style>
+  body, html {
+    margin: 0; padding: 0; overflow: hidden; background: black;
+  }
+  canvas {
+    display: block;
+    margin: 0 auto;
+    background: url('background.png') no-repeat center center;
+    background-size: cover;
+  }
+</style>
+</head>
+<body>
+<canvas id="gameCanvas" width="360" height="640"></canvas>
+
+<audio id="bgMusic" src=audio/background.mp3"" loop></audio>
+<audio id="shootSound" src="audio/shoot.wav"></audio>
+<audio id="hitSound" src="audio/hit.wav"></audio>
+
+<script>
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+const bgMusic = document.getElementById('bgMusic');
+const shootSound = document.getElementById('shootSound');
+const hitSound = document.getElementById('hitSound');
+
+bgMusic.play();
+
+let playerX = canvas.width / 2;
+let playerY = canvas.height - 50;
+let bullets = [];
+let enemies = [];
+let score = 0;
+let touchStartX = 0;
+let touchEndX = 0;
+
+canvas.addEventListener('touchstart', e => {
+  touchStartX = e.changedTouches[0].clientX;
+});
+
+canvas.addEventListener('touchmove', e => {
+  touchEndX = e.changedTouches[0].clientX;
+  let dx = touchEndX - touchStartX;
+  playerX += dx;
+  if (playerX < 20) playerX = 20;
+  if (playerX > canvas.width - 20) playerX = canvas.width - 20;
+  touchStartX = touchEndX;
+});
+
+canvas.addEventListener('touchend', () => {
+  shootBullet();
+  shootSound.play();
+});
+
+function shootBullet() {
+  bullets.push({x: playerX, y: playerY - 20, speed: 7});
+}
+
+function spawnEnemy() {
+  const x = Math.random() * (canvas.width - 40) + 20;
+  enemies.push({x: x, y: -20, speed: 3});
+}
+setInterval(spawnEnemy, 1000);
+
+function update() {
+  bullets.forEach(bullet => bullet.y -= bullet.speed);
+  bullets = bullets.filter(bullet => bullet.y > 0);
+
+  enemies.forEach(enemy => {
+    enemy.y += enemy.speed;
+    if (enemy.y > canvas.height) {
+      score -= 10;
+      hitSound.play();
+    }
+  });
+
+  enemies = enemies.filter(enemy => enemy.y < canvas.height);
+
+  bullets.forEach(bullet => {
+    enemies.forEach((enemy, eIndex) => {
+      if (bullet.x > enemy.x - 15 && bullet.x < enemy.x + 15 && bullet.y > enemy.y - 15 && bullet.y < enemy.y + 15) {
+        score += 20;
+        hitSound.play();
+        enemies.splice(eIndex, 1);
+        bullet.y = -10;
+      }
+    });
+  });
+}
+
+function draw() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  ctx.fillStyle = 'white';
+  ctx.fillRect(playerX - 15, playerY - 10, 30, 20);
+
+  ctx.fillStyle = 'yellow';
+  bullets.forEach(bullet => ctx.fillRect(bullet.x - 3, bullet.y - 10, 6, 10));
+
+  ctx.fillStyle = 'red';
+  enemies.forEach(enemy => ctx.fillRect(enemy.x - 15, enemy.y - 15, 30, 30));
+
+  ctx.fillStyle = 'white';
+  ctx.fillText('Score: ' + score, 10, 30);
+}
+
+function gameLoop() {
+  update();
+  draw();
+  requestAnimationFrame(gameLoop);
+}
+
+gameLoop();
+</script>
+</body>
+</html>
