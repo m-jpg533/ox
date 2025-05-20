@@ -75,6 +75,13 @@
   <video width="560" height="315" controls>
     <source src="22.mp4" type="video/mp4">
   </video>
-  
+  <p>搜尋結果：<span id="result"></span></p>
+
+<script>
+  const params = new URLSearchParams(window.location.search);
+  const search = params.get("search");
+  document.getElementById("result").innerHTML = search;
+</script>
+
 </body>
 </html>
