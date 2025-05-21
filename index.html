@@ -45,7 +45,27 @@
   </style>
 </head>
 <body>
-  
+  <!-- Swiper HTML 結構 -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper/swiper-bundle.min.css" />
+<div class="swiper">
+  <div class="swiper-wrapper">
+    <div class="swiper-slide"><img src="11.jpg"></div>
+    <div class="swiper-slide"><img src="12.jpg"></div>
+    <div class="swiper-slide"><img src="13.jpg"></div>
+  </div>
+  <div class="swiper-pagination"></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/swiper/swiper-bundle.min.js"></script>
+<script>
+  const swiper = new Swiper('.swiper', {
+    loop: true,
+    pagination: {
+      el: '.swiper-pagination',
+    },
+  });
+</script>
+
   <p>這是我在 GitHub Pages 建立的第一個網頁</p>
   <h1>2025/04/17 金獅酒樓聚餐</h1>
   <!-- ✅ 點圖片跳轉 -->
