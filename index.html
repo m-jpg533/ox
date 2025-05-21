@@ -11,6 +11,7 @@
       text-align: center;
       background-color: #f8f8f8;
       padding: 50px;
+      padding-bottom: 320px; /* 預留聊天框空間 */
     }
     img {
       max-width: 80%;
@@ -42,82 +43,8 @@
     .btn:hover {
       background-color: #cc0000;
     }
-  </style>
-</head>
-<body>
- 
-  <p>這是我在 GitHub Pages 建立的第一個網頁</p>
-  <h1>2025/04/17 金獅酒樓聚餐</h1>
-  <!-- ✅ 點圖片跳轉 -->
-  <a href="https://example.com" target="_blank">
-    </a>
-    <div>
-      <img src="11.jpg"  alt="圖片" width="300">
-    </div>
-    <div>
-      <img src="12.jpg" alt="圖片"  width="300">
-    </div>
-    
-    <div>
-    <img src="13.jpg"  alt="圖片" width="300">
-     </div>
-    <h2>我們的地點</h2>
-<iframe src="https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d38027.142908352136!2d121.52402609735584!3d25.108045078955584!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e0!3m2!1szh-TW!2stw!4v1747798601273!5m2!1szh-TW!2stw" 
-  width="600" 
-  height="450" 
-  style="border:0;" 
-  allowfullscreen="" 
-  loading="lazy" 
-  referrerpolicy="no-referrer-when-downgrade">
-</iframe>
 
-   <!-- Swiper HTML 結構 -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper/swiper-bundle.min.css" />
-<div class="swiper">
-  <div class="swiper-wrapper">
-    <div class="swiper-slide"><img src="31.gif"></div>
-    <div class="swiper-slide"><img src="18.jpg"></div>
-    <div class="swiper-slide"><img src="19.jpg"></div>
-  </div>
-  <div class="swiper-pagination"></div>
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/swiper/swiper-bundle.min.js"></script>
-<script>
-  const swiper = new Swiper('.swiper', {
-    loop: true,
-    pagination: {
-      el: '.swiper-pagination',
-    },
-  });
-</script> 
-  <!-- ✅ YouTube 按鈕 -->
-  <br>
-  <iframe width="560" height="315" src="https://www.youtube.com/embed/xvajI1ljigc?si=mHSdawfQU7njDwdh" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-    
-  ▶️ 點我看影片
-  <video width="560" height="315" controls>
-    <source src="57.mp4" type="video/mp4">
-  </video>
-  <video width="560" height="315" controls>
-    <source src="3.mp4" type="video/mp4">
-  </video>
-  <video width="560" height="315" controls>
-    <source src="22.mp4" type="video/mp4">
-  </video>
-  <p>搜尋結果：<span id="result"></span></p>
-
-<script>
-  const params = new URLSearchParams(window.location.search);
-  const search = params.get("search");
-  document.getElementById("result").innerHTML = search;
-</script>
-<head>
-  ...
-  <style>
-    body {
-      padding-bottom: 320px; /* 預留聊天框空間 */
-    }
+    /* 聊天室樣式強制置底 */
     #tawk_682d3ca2c29def190907f3f2 {
       bottom: 0 !important;
       right: 0 !important;
@@ -132,12 +59,70 @@
   </style>
 </head>
 <body>
-  <!-- 你網站的其他內容 -->
+
+  <p>這是我在 GitHub Pages 建立的第一個網頁</p>
+  <h1>2025/04/17 金獅酒樓聚餐</h1>
+
+  <div><img src="11.jpg" alt="圖片" width="300"></div>
+  <div><img src="12.jpg" alt="圖片" width="300"></div>
+  <div><img src="13.jpg" alt="圖片" width="300"></div>
+
+  <h2>我們的地點</h2>
+  <iframe
+    src="https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d38027.142908352136!2d121.52402609735584!3d25.108045078955584!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e0!3m2!1szh-TW!2stw!4v1747798601273!5m2!1szh-TW!2stw"
+    width="600"
+    height="450"
+    style="border:0;"
+    allowfullscreen=""
+    loading="lazy"
+    referrerpolicy="no-referrer-when-downgrade">
+  </iframe>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper/swiper-bundle.min.css" />
+  <div class="swiper">
+    <div class="swiper-wrapper">
+      <div class="swiper-slide"><img src="31.gif"></div>
+      <div class="swiper-slide"><img src="18.jpg"></div>
+      <div class="swiper-slide"><img src="19.jpg"></div>
+    </div>
+    <div class="swiper-pagination"></div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/swiper/swiper-bundle.min.js"></script>
+  <script>
+    const swiper = new Swiper('.swiper', {
+      loop: true,
+      pagination: {
+        el: '.swiper-pagination',
+      },
+    });
+  </script>
+
+  <br>
+  <iframe width="560" height="315" src="https://www.youtube.com/embed/xvajI1ljigc?si=mHSdawfQU7njDwdh" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+
+  ▶️ 點我看影片
+  <video width="560" height="315" controls>
+    <source src="57.mp4" type="video/mp4">
+  </video>
+  <video width="560" height="315" controls>
+    <source src="3.mp4" type="video/mp4">
+  </video>
+  <video width="560" height="315" controls>
+    <source src="22.mp4" type="video/mp4">
+  </video>
+
+  <p>搜尋結果：<span id="result"></span></p>
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const search = params.get("search");
+    document.getElementById("result").innerHTML = search;
+  </script>
 
   <!-- Tawk.to Script -->
   <script type="text/javascript">
     var Tawk_API = Tawk_API || {}, Tawk_LoadStart = new Date();
-    (function() {
+    (function () {
       var s1 = document.createElement("script"), s0 = document.getElementsByTagName("script")[0];
       s1.async = true;
       s1.src = 'https://embed.tawk.to/682d3ca2c29def190907f3f2/1irob9mik';
@@ -146,11 +131,10 @@
       s0.parentNode.insertBefore(s1, s0);
     })();
 
-    Tawk_API.onLoad = function() {
+    Tawk_API.onLoad = function () {
       Tawk_API.maximize();
     };
   </script>
-</body>
 
 </body>
 </html>
