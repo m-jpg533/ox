@@ -45,22 +45,7 @@
   </style>
 </head>
 <body>
-  <!-- 網站內容 -->
-  <h1>歡迎來到 OX</h1>
-  <!--Start of Tawk.to Script-->
-<script type="text/javascript">
-var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
-(function(){
-var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
-s1.async=true;
-s1.src='https://embed.tawk.to/682d3ca2c29def190907f3f2/1irob9mik';
-s1.charset='UTF-8';
-s1.setAttribute('crossorigin','*');
-s0.parentNode.insertBefore(s1,s0);
-})();
-</script>
-<!--End of Tawk.to Script-->
-
+ 
   <p>這是我在 GitHub Pages 建立的第一個網頁</p>
   <h1>2025/04/17 金獅酒樓聚餐</h1>
   <!-- ✅ 點圖片跳轉 -->
@@ -118,6 +103,45 @@ s0.parentNode.insertBefore(s1,s0);
   const search = params.get("search");
   document.getElementById("result").innerHTML = search;
 </script>
+<head>
+  ...
+  <style>
+    body {
+      padding-bottom: 320px; /* 預留聊天框空間 */
+    }
+    #tawk_682d3ca2c29def190907f3f2 {
+      bottom: 0 !important;
+      right: 0 !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      height: 300px !important;
+      border-radius: 0 !important;
+      box-shadow: none !important;
+      position: fixed !important;
+      z-index: 999999 !important;
+    }
+  </style>
+</head>
+<body>
+  <!-- 你網站的其他內容 -->
+
+  <!-- Tawk.to Script -->
+  <script type="text/javascript">
+    var Tawk_API = Tawk_API || {}, Tawk_LoadStart = new Date();
+    (function() {
+      var s1 = document.createElement("script"), s0 = document.getElementsByTagName("script")[0];
+      s1.async = true;
+      s1.src = 'https://embed.tawk.to/682d3ca2c29def190907f3f2/1irob9mik';
+      s1.charset = 'UTF-8';
+      s1.setAttribute('crossorigin', '*');
+      s0.parentNode.insertBefore(s1, s0);
+    })();
+
+    Tawk_API.onLoad = function() {
+      Tawk_API.maximize();
+    };
+  </script>
+</body>
 
 </body>
 </html>
