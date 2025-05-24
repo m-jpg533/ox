@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
@@ -74,11 +75,7 @@
 <div id="miners"></div>
 <button onclick="startMining()">開始挖礦</button>
 
-<!-- 這邊接下來是你的 <script> ... -->
-
-
-
-<!-- 固定在右下角的全頁動畫（可移除） -->
+<!-- 右下角固定裝飾動畫 -->
 <img width="120" height="120" src="https://media.giphy.com/media/l0ExncehJzexFpRHq/giphy.gif" alt="mining animation" class="fixed-animation">
 
 <script>
@@ -93,8 +90,7 @@
     container.className = "miner";
     container.innerHTML = `
       <h3>礦工 ${index + 1} ⛏️</h3>
-      <img width="120" height="120" src="https://media.giphy.com/media/l0ExncehJzexFpRHq/giphy.gif" alt="mining animation" class="fixed-animation">
-" alt="mining" class="mining-icon">
+      <img width="120" height="120" src="https://media.giphy.com/media/l0ExncehJzexFpRHq/giphy.gif" alt="mining" class="mining-icon">
       <div>速度：<span id="speed${index}">0</span> hash/s</div>
       <div>目前 hash：<span id="hash${index}" class="hash">N/A</span></div>
       <div class="progress"><div id="bar${index}" class="bar"></div></div>
@@ -164,7 +160,6 @@
         }
 
         miner.barElem.style.width = `${(miner.nonce % 100) + 1}%`;
-
         setTimeout(mine, Math.random() * 10);
       }
 
