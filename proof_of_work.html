@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
@@ -39,6 +40,18 @@
       cursor: pointer;
       margin-top: 10px;
     }
+    .mining-icon {
+      width: 40px;
+      margin: 5px 0;
+    }
+    .fixed-animation {
+      position: fixed;
+      bottom: 10px;
+      right: 10px;
+      width: 80px;
+      z-index: 999;
+      opacity: 0.8;
+    }
   </style>
 </head>
 <body>
@@ -46,6 +59,9 @@
 <h1>💻 網頁版挖礦比賽模擬器</h1>
 <div id="miners"></div>
 <button onclick="startMining()">開始挖礦</button>
+
+<!-- 固定在右下角的全頁動畫（可移除） -->
+<img src="mining.gif" alt="mining animation" class="fixed-animation">
 
 <script>
   const NUM_MINERS = 4;
@@ -59,6 +75,7 @@
     container.className = "miner";
     container.innerHTML = `
       <h3>礦工 ${index + 1} ⛏️</h3>
+      <img src="mining.gif" alt="mining" class="mining-icon">
       <div>速度：<span id="speed${index}">0</span> hash/s</div>
       <div>目前 hash：<span id="hash${index}" class="hash">N/A</span></div>
       <div class="progress"><div id="bar${index}" class="bar"></div></div>
@@ -105,14 +122,12 @@
         miner.hashElem.textContent = hash;
         count++;
 
-        // 模擬找到礦
         if (hash.startsWith(targetPrefix)) {
           miner.statusElem.textContent = `🎉 成功挖到礦！nonce=${miner.nonce}`;
           miner.barElem.style.width = "100%";
           miner.running = false;
           mining = false;
 
-          // 停止其他礦工
           for (let m of miners) {
             if (m !== miner) {
               m.running = false;
@@ -123,14 +138,12 @@
           return;
         }
 
-        // 更新速度
         if (Date.now() - lastTime >= 1000) {
           miner.speedElem.textContent = count;
           count = 0;
           lastTime = Date.now();
         }
 
-        // 模擬進度條（純裝飾）
         miner.barElem.style.width = `${(miner.nonce % 100) + 1}%`;
 
         setTimeout(mine, Math.random() * 10);
