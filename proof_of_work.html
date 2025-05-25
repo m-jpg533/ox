@@ -182,7 +182,7 @@
       mine();
     }
 
-    // 比賽限制時間：60 秒
+    // 比賽限制時間：120 秒
     setTimeout(() => {
       if (mining) {
         mining = false;
@@ -194,7 +194,7 @@
         explosionSound.play();
         alert("⏱️ 挖礦時間結束，沒有人成功挖到礦！");
       }
-    }, 60000);
+    }, 120000);
   }
 </script>
 
