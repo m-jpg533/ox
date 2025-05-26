@@ -23,13 +23,12 @@
   <canvas id="gameCanvas" width="360" height="640"></canvas>
 
   <!-- 背景音樂與音效 -->
-  <audio id="bgm" src="https://m-jpg533.github.io/ox/SoundHelix-Song-1.mp3" loop></audio>
+  <audio id="bgm" src="SoundHelix-Song-1.mp3" loop></audio>
   <audio id="shootSound" src="shoot-5-102360.mp3"></audio>
   <audio id="hitSound" src="cinematic-hit-159487.mp3"></audio>
-  <audio id="successSound" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_1e8ae3a53c.mp3?filename=success.mp3" preload="auto"></audio>
 
-  <!-- 開始按鈕 -->
-  <button id="startBtn" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);padding:20px 40px;font-size:20px;">點我開始</button>
+  <audio id="successSound" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_1e8ae3a53c.mp3?filename=success.mp3" preload="auto"></audio>
+    <button id="startBtn" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);padding:20px 40px;font-size:20px;">點我開始</button>
 
   <script>
     const canvas = document.getElementById("gameCanvas");
@@ -38,11 +37,11 @@
     const successSound = document.getElementById("successSound");
     const startBtn = document.getElementById("startBtn");
 
-    startBtn.addEventListener("click", () => {
-      bgm.play().catch(e => console.log("音樂播放錯誤", e));
-      gameLoop(); // 點擊才開始遊戲與音樂
-      startBtn.style.display = "none";
-    });
+startBtn.addEventListener("click", () => {
+  bgm.play().catch(e => console.log("音樂播放錯誤", e));
+  gameLoop();  // 如果你原本遊戲是自動執行的，這裡改成手動啟動
+  startBtn.style.display = "none";
+});
 
     let playerX = canvas.width / 2;
     let playerY = canvas.height - 40;
@@ -50,6 +49,14 @@
     let enemies = [];
     let score = 0;
 
+    // ✅ 手機點一下就播放背景音樂
+    window.addEventListener("touchstart", () => {
+      if (bgm.paused) {
+        bgm.play().catch(e => console.log("音樂播放失敗：", e));
+      }
+    }, { once: true });
+
+    // 玩家移動與射擊
     let touchStartX = 0;
     canvas.addEventListener("touchstart", e => {
       touchStartX = e.touches[0].clientX;
@@ -60,6 +67,8 @@
       const dx = touchX - touchStartX;
       playerX += dx;
       touchStartX = touchX;
+
+      // 邊界限制
       if (playerX < 20) playerX = 20;
       if (playerX > canvas.width - 20) playerX = canvas.width - 20;
     });
@@ -72,19 +81,21 @@
       const x = Math.random() * (canvas.width - 40) + 20;
       enemies.push({ x, y: -30, speed: 2.5 });
     }
+
     setInterval(spawnEnemy, 1000);
 
     function update() {
       bullets.forEach(b => b.y -= b.speed);
       bullets = bullets.filter(b => b.y > 0);
+
       enemies.forEach(e => e.y += e.speed);
       enemies = enemies.filter(e => e.y < canvas.height);
 
       bullets.forEach((b, bi) => {
         enemies.forEach((e, ei) => {
           if (Math.abs(b.x - e.x) < 15 && Math.abs(b.y - e.y) < 15) {
-            bullets[bi].y = -10;
-            enemies.splice(ei, 1);
+            bullets[bi].y = -10; // 子彈移除
+            enemies.splice(ei, 1); // 敵人移除
             score += 10;
             successSound.play();
           }
@@ -95,11 +106,14 @@
     function draw() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.fillStyle = "white";
-      ctx.fillRect(playerX - 15, playerY - 10, 30, 20);
+      ctx.fillRect(playerX - 15, playerY - 10, 30, 20); // 玩家
+
       ctx.fillStyle = "yellow";
-      bullets.forEach(b => ctx.fillRect(b.x - 2, b.y - 10, 4, 10));
+      bullets.forEach(b => ctx.fillRect(b.x - 2, b.y - 10, 4, 10)); // 子彈
+
       ctx.fillStyle = "red";
-      enemies.forEach(e => ctx.fillRect(e.x - 15, e.y - 15, 30, 30));
+      enemies.forEach(e => ctx.fillRect(e.x - 15, e.y - 15, 30, 30)); // 敵人
+
       ctx.fillStyle = "white";
       ctx.font = "20px Arial";
       ctx.fillText("分數：" + score, 10, 30);
@@ -110,10 +124,11 @@
       draw();
       requestAnimationFrame(gameLoop);
     }
-    
+
 
   </script>
 </body>
 </html>
+
 
 
