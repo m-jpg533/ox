@@ -105,7 +105,7 @@
       ctx.fillText("分數：" + score, 10, 30);
     }
 
-    function gameLoop();  // ❌ 移除這行！讓按鈕點擊才啟動{
+    function gameLoop()
       update();
       draw();
       requestAnimationFrame(gameLoop);
