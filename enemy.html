@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <title>忍者打鬥遊戲測試</title>
+  <style>
+    body {
+      margin: 0;
+      background: black;
+      overflow: hidden;
+      touch-action: none;
+    }
+    canvas {
+      display: block;
+      margin: auto;
+      background: #222;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="gameCanvas" width="360" height="640"></canvas>
+
+  <script>
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+
+    let ninja = {
+      x: canvas.width / 2 - 25,
+      y: canvas.height - 80,
+      width: 50,
+      height: 60,
+      color: "white",
+      isAttacking: false
+    };
+
+    let enemies = [
+      { x: 50, y: 100, width: 50, height: 60, color: "red" },
+      { x: 250, y: 200, width: 50, height: 60, color: "orange" }
+    ];
+
+    let touchStartX = 0;
+    let isDragging = false;
+
+    // 觸控移動與攻擊
+    canvas.addEventListener("touchstart", e => {
+      const touch = e.touches[0];
+      touchStartX = touch.clientX;
+      isDragging = true;
+    });
+
+    canvas.addEventListener("touchmove", e => {
+      if (!isDragging) return;
+      const touch = e.touches[0];
+      const dx = touch.clientX - touchStartX;
+      ninja.x += dx;
+      if (ninja.x < 0) ninja.x = 0;
+      if (ninja.x > canvas.width - ninja.width) ninja.x = canvas.width - ninja.width;
+      touchStartX = touch.clientX;
+    });
+
+    canvas.addEventListener("touchend", e => {
+      // 滑動判定攻擊
+      ninja.isAttacking = true;
+      setTimeout(() => ninja.isAttacking = false, 200);
+    });
+
+    function update() {
+      // 攻擊命中判定
+      if (ninja.isAttacking) {
+        enemies = enemies.filter(enemy => {
+          const hit =
+            Math.abs(ninja.x + ninja.width / 2 - (enemy.x + enemy.width / 2)) < 60 &&
+            Math.abs(ninja.y - enemy.y) < 50;
+          return !hit; // 被打到的敵人移除
+        });
+      }
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // 主角
+      ctx.fillStyle = ninja.isAttacking ? "yellow" : ninja.color;
+      ctx.fillRect(ninja.x, ninja.y, ninja.width, ninja.height);
+
+      // 敵人
+      enemies.forEach(enemy => {
+        ctx.fillStyle = enemy.color;
+        ctx.fillRect(enemy.x, enemy.y, enemy.width, enemy.height);
+      });
+    }
+
+    function loop() {
+      update();
+      draw();
+      requestAnimationFrame(loop);
+    }
+
+    loop();
+  </script>
+</body>
+</html>
