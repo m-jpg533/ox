@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <title>忍者打鬥遊戲</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: black;
+      height: 100%;
+      overflow: hidden;
+      touch-action: none;
+    }
+    #gameCanvas {
+      display: block;
+      margin: auto;
+      background: #222;
+      touch-action: none;
+      image-rendering: pixelated;
+    }
+    #ui {
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: white;
+      font-family: sans-serif;
+      font-size: 18px;
+      z-index: 10;
+    }
+    #gameOver {
+      display: none;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: red;
+      font-size: 36px;
+      font-family: sans-serif;
+    }
+  </style>
+</head>
+<body>
+  <div id="ui">HP: <span id="hp">3</span></div>
+  <div id="gameOver">Game Over<br><button onclick="location.reload()">重新開始</button></div>
+  <canvas id="gameCanvas" width="360" height="640"></canvas>
+
+  <script>
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+    const hpDisplay = document.getElementById("hp");
+    const gameOverDiv = document.getElementById("gameOver");
+
+    function resizeCanvas() {
+      const scale = Math.min(window.innerWidth / 360, window.innerHeight / 640);
+      canvas.style.transform = `scale(${scale})`;
+      canvas.style.transformOrigin = "top left";
+    }
+    window.addEventListener("resize", resizeCanvas);
+    resizeCanvas();
+
+    let ninja = {
+      x: canvas.width / 2 - 25,
+      y: canvas.height - 80,
+      width: 50,
+      height: 60,
+      color: "white",
+      isAttacking: false,
+      hp: 3
+    };
+
+    let enemies = [];
+    let bossAppeared = false;
+    let frame = 0;
+
+    function spawnEnemy() {
+      enemies.push({
+        x: Math.random() * (canvas.width - 50),
+        y: -60,
+        width: 50,
+        height: 60,
+        color: "orange",
+        speed: 1 + Math.random()
+      });
+    }
+
+    function spawnBoss() {
+      enemies.push({
+        x: canvas.width / 2 - 75,
+        y: -120,
+        width: 150,
+        height: 120,
+        color: "purple",
+        speed: 0.5,
+        isBoss: true,
+        hp: 5
+      });
+    }
+
+    let touchStartX = 0;
+    let isDragging = false;
+
+    canvas.addEventListener("touchstart", e => {
+      const touch = e.touches[0];
+      touchStartX = touch.clientX;
+      isDragging = true;
+    });
+
+    canvas.addEventListener("touchmove", e => {
+      if (!isDragging) return;
+      const touch = e.touches[0];
+      const dx = touch.clientX - touchStartX;
+      ninja.x += dx;
+      if (ninja.x < 0) ninja.x = 0;
+      if (ninja.x > canvas.width - ninja.width) ninja.x = canvas.width - ninja.width;
+      touchStartX = touch.clientX;
+    });
+
+    canvas.addEventListener("touchend", e => {
+      ninja.isAttacking = true;
+      setTimeout(() => ninja.isAttacking = false, 200);
+      isDragging = false;
+    });
+
+    function update() {
+      frame++;
+      if (frame % 90 === 0 && !bossAppeared) spawnEnemy();
+      if (frame > 1200 && !bossAppeared) {
+        spawnBoss();
+        bossAppeared = true;
+      }
+
+      enemies.forEach(enemy => enemy.y += enemy.speed);
+
+      enemies.forEach(enemy => {
+        if (!enemy.isBoss &&
+            Math.abs(ninja.x + ninja.width / 2 - (enemy.x + enemy.width / 2)) < 40 &&
+            Math.abs(ninja.y - enemy.y) < 50) {
+          ninja.hp--;
+          hpDisplay.textContent = ninja.hp;
+          enemy.y = canvas.height + 100;
+        }
+      });
+
+      if (ninja.hp <= 0) {
+        gameOverDiv.style.display = "block";
+        cancelAnimationFrame(animId);
+        return;
+      }
+
+      if (ninja.isAttacking) {
+        enemies.forEach((enemy, i) => {
+          const hit =
+            Math.abs(ninja.x + ninja.width / 2 - (enemy.x + enemy.width / 2)) < 60 &&
+            Math.abs(ninja.y - enemy.y) < 60;
+          if (hit) {
+            if (enemy.isBoss) {
+              enemy.hp--;
+              if (enemy.hp <= 0) enemies.splice(i, 1);
+            } else {
+              enemies.splice(i, 1);
+            }
+          }
+        });
+      }
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = ninja.isAttacking ? "yellow" : ninja.color;
+      ctx.fillRect(ninja.x, ninja.y, ninja.width, ninja.height);
+
+      enemies.forEach(enemy => {
+        ctx.fillStyle = enemy.color;
+        ctx.fillRect(enemy.x, enemy.y, enemy.width, enemy.height);
+        if (enemy.isBoss) {
+          ctx.fillStyle = "white";
+          ctx.fillText(`BOSS HP: ${enemy.hp}`, enemy.x, enemy.y - 5);
+        }
+      });
+    }
+
+    let animId;
+    function loop() {
+      update();
+      draw();
+      animId = requestAnimationFrame(loop);
+    }
+    loop();
+  </script>
+</body>
+</html>
