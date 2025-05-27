@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>忍者打鬥遊戲</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background: black;
+      touch-action: none;
+    }
+    canvas {
+      display: block;
+      width: 100vw;
+      height: 100vh;
+      background: #222;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="gameCanvas"></canvas>
+  <script>
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    const ninjaImg = new Image();
+    ninjaImg.src = "https://i.imgur.com/yV3zA0j.png"; // 卡通忍者圖片
+
+    const enemyImg = new Image();
+    enemyImg.src = "https://i.imgur.com/ro9zYUs.png"; // 敵人圖片
+
+    let ninja = {
+      x: canvas.width / 2 - 40,
+      y: canvas.height - 120,
+      width: 80,
+      height: 100,
+      isAttacking: false,
+      health: 3
+    };
+
+    let enemies = [
+      { x: 60, y: 50, vy: 2, width: 60, height: 80 },
+      { x: canvas.width - 100, y: 150, vy: 1.5, width: 60, height: 80 }
+    ];
+
+    let boss = {
+      active: false,
+      x: canvas.width / 2 - 100,
+      y: -200,
+      width: 200,
+      height: 150,
+      health: 10
+    };
+
+    let touchStartX = 0;
+    let isDragging = false;
+
+    canvas.addEventListener("touchstart", e => {
+      touchStartX = e.touches[0].clientX;
+      isDragging = true;
+    });
+
+    canvas.addEventListener("touchmove", e => {
+      if (!isDragging) return;
+      const dx = e.touches[0].clientX - touchStartX;
+      ninja.x += dx;
+      if (ninja.x < 0) ninja.x = 0;
+      if (ninja.x > canvas.width - ninja.width) ninja.x = canvas.width - ninja.width;
+      touchStartX = e.touches[0].clientX;
+    });
+
+    canvas.addEventListener("touchend", () => {
+      ninja.isAttacking = true;
+      setTimeout(() => ninja.isAttacking = false, 300);
+    });
+
+    function update() {
+      enemies.forEach(enemy => {
+        enemy.y += enemy.vy;
+        if (enemy.y > canvas.height) enemy.y = -enemy.height;
+      });
+
+      if (ninja.isAttacking) {
+        enemies = enemies.filter(e => {
+          const hit = Math.abs((ninja.x + ninja.width / 2) - (e.x + e.width / 2)) < 60 &&
+                      Math.abs((ninja.y + ninja.height / 2) - (e.y + e.height / 2)) < 60;
+          return !hit;
+        });
+
+        if (boss.active && Math.abs((ninja.x + ninja.width / 2) - (boss.x + boss.width / 2)) < 100) {
+          boss.health -= 1;
+        }
+      }
+
+      if (enemies.length === 0 && !boss.active) {
+        boss.active = true;
+        boss.y = 50;
+      }
+
+      if (boss.active && boss.health <= 0) {
+        alert("你打敗了 Boss！恭喜通關！");
+        location.reload();
+      }
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // 主角
+      if (ninja.isAttacking) {
+        ctx.globalAlpha = 0.7;
+      }
+      ctx.drawImage(ninjaImg, ninja.x, ninja.y, ninja.width, ninja.height);
+      ctx.globalAlpha = 1;
+
+      // 敵人
+      enemies.forEach(e => {
+        ctx.drawImage(enemyImg, e.x, e.y, e.width, e.height);
+      });
+
+      // Boss
+      if (boss.active) {
+        ctx.fillStyle = "purple";
+        ctx.fillRect(boss.x, boss.y, boss.width, boss.height);
+        ctx.fillStyle = "white";
+        ctx.fillText("Boss 血量: " + boss.health, boss.x, boss.y - 10);
+      }
+
+      // 血量條
+      for (let i = 0; i < ninja.health; i++) {
+        ctx.fillStyle = "red";
+        ctx.fillRect(10 + i * 25, 10, 20, 20);
+      }
+    }
+
+    function loop() {
+      update();
+      draw();
+      requestAnimationFrame(loop);
+    }
+
+    loop();
+  </script>
+</body>
+</html>
