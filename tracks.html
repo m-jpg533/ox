@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>自動位置追蹤</title>
+</head>
+<body>
+    <h1>自動位置追蹤</h1>
+    <p>每當位置變化時，自動發送位置資料到伺服器。</p>
+    <div id="status">等待位置更新中...</div>
+
+    <script>
+        let watchId;
+
+        function startTracking() {
+            if (navigator.geolocation) {
+                watchId = navigator.geolocation.watchPosition(
+                    function (position) {
+                        const data = {
+                            latitude: position.coords.latitude,
+                            longitude: position.coords.longitude
+                        };
+
+                        document.getElementById("status").innerText = 
+                            "追蹤中：Lat " + data.latitude + ", Lon " + data.longitude;
+
+                        fetch("https://YOUR_BACKEND_URL/save-location", {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json"
+                            },
+                            body: JSON.stringify(data)
+                        })
+                        .then(response => response.json())
+                        .then(data => console.log("位置已更新：", data))
+                        .catch(error => console.error("傳送位置資料時發生錯誤：", error));
+                    },
+                    function (error) {
+                        let errorMessage;
+                        switch (error.code) {
+                            case error.PERMISSION_DENIED:
+                                errorMessage = "使用者拒絕存取位置。"; break;
+                            case error.POSITION_UNAVAILABLE:
+                                errorMessage = "位置資訊不可用。"; break;
+                            case error.TIMEOUT:
+                                errorMessage = "取得位置逾時。"; break;
+                            default:
+                                errorMessage = "未知錯誤：" + error.message;
+                        }
+                        document.getElementById("status").innerText = "錯誤：" + errorMessage;
+                        console.error("定位錯誤：", errorMessage);
+                    },
+                    {
+                        enableHighAccuracy: true,
+                        timeout: 10000,
+                        maximumAge: 0
+                    }
+                );
+            } else {
+                document.getElementById("status").innerText = "瀏覽器不支援地理定位。";
+            }
+        }
+
+        startTracking();
+    </script>
+</body>
+</html>
