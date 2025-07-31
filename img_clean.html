@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <title>一次性影片與圖片</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 40px;
+      background-color: #f0f0f0;
+    }
+    #media-container, #restore-form {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      display: inline-block;
+      box-shadow: 0 0 10px #aaa;
+    }
+    img, video {
+      max-width: 100%;
+      border-radius: 8px;
+      margin-top: 10px;
+    }
+    #restore-form {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+<div id="media-container">
+  <h2>機密圖片與影片</h2>
+  <img src="https://i.ibb.co/wFnrRHb/your-image.jpg" alt="秘密圖片" id="secret-image">
+
+  <video id="secret-video" controls>
+    <source src="27.mp4" type="video/mp4">
+    您的瀏覽器不支援影片播放。
+  </video>
+  <p>請觀看完影片，內容將自動消失</p>
+</div>
+
+<div id="restore-form">
+  <h2>內容已銷毀</h2>
+  <p>輸入密碼以恢復內容：</p>
+  <input type="password" id="password-input" placeholder="請輸入密碼">
+  <button onclick="checkPassword()">恢復</button>
+  <p id="error-message" style="color: red;"></p>
+</div>
+
+<script>
+  const mediaContainer = document.getElementById("media-container");
+  const restoreForm = document.getElementById("restore-form");
+  const passwordInput = document.getElementById("password-input");
+  const errorMessage = document.getElementById("error-message");
+
+  // 設定密碼（可改為伺服器驗證）
+  const SECRET_PASSWORD = "1234";
+
+  // 銷毀內容
+  function destroyContent() {
+    mediaContainer.style.display = "none";
+    restoreForm.style.display = "block";
+  }
+
+  // 驗證密碼
+  function checkPassword() {
+    if (passwordInput.value === SECRET_PASSWORD) {
+      restoreForm.style.display = "none";
+      mediaContainer.style.display = "block";
+      passwordInput.value = "";
+      errorMessage.textContent = "";
+    } else {
+      errorMessage.textContent = "密碼錯誤，請再試一次。";
+    }
+  }
+
+  // 影片播放結束時觸發銷毀
+  const video = document.getElementById("secret-video");
+  video.addEventListener("ended", () => {
+    setTimeout(destroyContent, 5000);  // 延遲 5 秒銷毀
+  });
+</script>
+
+</body>
+</html>
