@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <title>點擊影片後字幕打字</title>
+  <style>
+    body {
+      background-color: #FFB415;
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .video-container {
+      position: relative;
+      width: 90%;
+      max-width: 720px;
+      height: 405px;
+      margin-bottom: 20px;
+    }
+
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+
+    #overlay {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.3);
+      cursor: pointer;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 24px;
+      font-weight: bold;
+    }
+
+    #subtitle {
+      max-width: 720px;
+      white-space: pre-wrap;
+      background: rgba(255, 255, 255, 0.8);
+      padding: 15px;
+      border-radius: 10px;
+      font-size: 18px;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="video-container">
+    <!-- YouTube Player -->
+    <iframe
+      id="ytplayer"
+      src="https://www.youtube.com/embed/_bBfG7t-MeM?enablejsapi=1"
+      allow="autoplay; encrypted-media"
+      allowfullscreen
+    ></iframe>
+
+    <!-- 點擊遮罩 -->
+    <div id="overlay">點擊開始播放</div>
+  </div>
+
+  <div id="subtitle"></div>
+
+  <script>
+    const text = `這不是我喜歡的酒，我喝的。
+這是單戀的酒，是孤獨的酒。
+即使你很會玩，
+每次聽到關於你的流言蜚語，
+都很難受，很難受。
+即使別人叫我傻女人，
+因為那是我無法忘懷的愛。
+我偷偷地對著你的臉哭泣。
+
+這些日子，人生坎坷，
+我喝得越多，
+就越後悔。
+與其在夢中燃燒，
+不如讓你用溫柔的力量擁抱我。
+我想要你，我想要你。
+即使別人叫我傻女人，
+因為那是我無法忘懷的愛。
+我偷偷地對著你的臉哭泣。
+
+瓶身上寫著「你是我的生命」。
+這是我傾注在心底的單戀之酒。
+在愛情傷痕累累的夜晚，
+我只記得美好的事物。
+我會活下去，我會活下去。
+即使他們叫我傻女人，
+因為愛我無法忘記。
+我偷偷地對著你的臉哭泣。`;
+
+    let player;
+    let index = 0;
+    let typingInterval;
+
+    // 加入 YouTube API 腳本
+    const tag = document.createElement('script');
+    tag.src = "https://www.youtube.com/iframe_api";
+    document.body.appendChild(tag);
+
+    // 建立播放器
+    function onYouTubeIframeAPIReady() {
+      player = new YT.Player('ytplayer');
+    }
+
+    // 點擊遮罩播放並打字幕
+    document.getElementById('overlay').addEventListener('click', () => {
+      if (player) {
+        player.unMute();            // 解除靜音
+        player.playVideo();         // 播放影片
+        document.getElementById('overlay').style.display = 'none';
+
+        const subtitle = document.getElementById('subtitle');
+        subtitle.textContent = "";
+        subtitle.style.display = "block";
+        index = 0;
+
+        typingInterval = setInterval(() => {
+          if (index < text.length) {
+            subtitle.textContent += text.charAt(index);
+            index++;
+          } else {
+            clearInterval(typingInterval);
+          }
+        }, 50); // 打字速度
+      }
+    });
+  </script>
+
+</body>
+</html>
