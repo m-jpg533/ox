@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!-- <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8">
@@ -136,6 +136,151 @@
           clearInterval(typingTimer);
         }
       }, 300); // 打字速度可微調
+    }
+  </script>
+</body>
+</html>
+ -->
+ <!-- 🎀 可愛版：粉嫩背景、圓角字幕框、卡通字體 -->
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>打字字幕影片 - 可愛版</title>
+  <style>
+    body {
+      background-color: #ffe4f2;
+      font-family: 'Comic Sans MS', 'Segoe Print', cursive;
+      margin: 0;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .video-container {
+      position: relative;
+      width: 100vw;
+      height: 56.25vw; /* 16:9 */
+      max-width: 720px;
+      max-height: 405px;
+    }
+
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+
+    #overlay {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(255, 182, 193, 0.5);
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 6vw;
+      color: #fff;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    #subtitle {
+      margin-top: 20px;
+      padding: 20px;
+      border-radius: 20px;
+      background-color: #fff0f8;
+      color: #ff1493;
+      font-size: 6vw;
+      text-align: center;
+      display: none;
+      max-width: 90%;
+      box-shadow: 0 0 10px pink;
+    }
+  </style>
+</head>
+<body>
+  <div class="video-container">
+    <iframe id="ytplayer" src="https://www.youtube.com/embed/1-daz7HNjxI?enablejsapi=1" allowfullscreen></iframe>
+    <div id="overlay">點我播放影片與字幕</div>
+  </div>
+
+  <div id="subtitle"></div>
+
+  <script>
+    const subtitles = [
+      { time: 30, text: "夜晚\n胡爾\n永同大橋" },
+      { time: 38, text: "一光院植\n片瀨" },
+      { time: 47, text: "奧加桑納尼·豪·索莫薩莫科" },
+      { time: 57, text: "沒有蘇克馬尼" },
+      { time: 61, text: "西米馬斯永同大橋" },
+      { time: 66, text: "瓦蘇魯伊\n泰國\n莫多魯伊\n年齡" },
+      { time: 76, text: "愚蠢，愚蠢，愚蠢" },
+      { time: 100, text: "墜落的嶺東星\n步行獨自一人" },
+      { time: 109, text: "下一個\n人們不知道 就是這樣\n你不會知道的" },
+      { time: 117, text: "就是這樣，我在逃避" },
+      { time: 122, text: "悲傷中\n淚流滿面\n義無反顧地走著" },
+      { time: 132, text: "延同橋，閃耀著光芒" },
+      { time: 137, text: "我必須忘記\n但我做不到" },
+      { time: 144, text: "這太愚蠢了，太愚蠢了，太愚蠢了" },
+      { time: 149, text: "我想是那扇門" },
+      { time: 180, text: "Amui\nHur Yeongdong\nDongye大學" },
+      { time: 191, text: "助產士堂莫諾瓦\n瀨長\n阿塞諾戈伊" },
+      { time: 200, text: "尤比崎瑪德莫耶塔·亞克尼" },
+      { time: 207, text: "鳴增連東橋\n夢野\n卡克拉加" },
+      { time: 216, text: "Ameninaru\n愚蠢，愚蠢，愚蠢\nmanamida" }
+    ];
+
+    let player;
+    let lastIndex = -1;
+    let typingTimer;
+    const subtitleElement = document.getElementById('subtitle');
+
+    function onYouTubeIframeAPIReady() {
+      player = new YT.Player('ytplayer');
+    }
+
+    const tag = document.createElement('script');
+    tag.src = "https://www.youtube.com/iframe_api";
+    document.body.appendChild(tag);
+
+    document.getElementById('overlay').addEventListener('click', () => {
+      if (player) {
+        player.playVideo();
+        player.unMute();
+        document.getElementById('overlay').style.display = 'none';
+
+        setInterval(() => {
+          const currentTime = player.getCurrentTime();
+          for (let i = 0; i < subtitles.length; i++) {
+            if (currentTime >= subtitles[i].time && i > lastIndex) {
+              lastIndex = i;
+              typeText(subtitles[i].text);
+              break;
+            }
+          }
+        }, 300);
+      }
+    });
+
+    function typeText(text) {
+      clearInterval(typingTimer);
+      subtitleElement.textContent = "";
+      subtitleElement.style.display = "block";
+      let index = 0;
+      typingTimer = setInterval(() => {
+        if (index < text.length) {
+          subtitleElement.textContent += text.charAt(index);
+          index++;
+        } else {
+          clearInterval(typingTimer);
+        }
+      }, 120);
     }
   </script>
 </body>
