@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <title>媒體上傳與分享</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; background: #f4f4f4; }
+    img, video { max-width: 100%; margin-top: 20px; }
+    #countdown { font-weight: bold; color: red; margin-top: 20px; }
+  </style>
+</head>
+<body>
+
+  <h2>上傳圖片或影片</h2>
+  <form action="/upload" method="POST" enctype="multipart/form-data">
+    <input type="text" name="name" placeholder="你的名字" required><br><br>
+    <input type="file" name="file" accept="image/*,video/*" required><br><br>
+    <button type="submit">上傳並取得分享連結</button>
+  </form>
+
+  {% if url %}
+    <hr>
+    <h3>分享連結：</h3>
+    <input type="text" value="{{ url }}" style="width: 100%;" readonly>
+    <p>
+      <a href="https://social-plugins.line.me/lineit/share?url={{ url | urlencode }}" target="_blank">
+        <img src="https://scdn.line-apps.com/n/line_it/thirdparty/icon_32.png" width="32"> 分享到 LINE
+      </a>
+    </p>
+  {% endif %}
+
+  {% if name and filetype and filename %}
+    <hr>
+    <h2>{{ name }} 的媒體</h2>
+    {% if filetype.startswith('image') %}
+      <img src="{{ url_for('static', filename='media/' + filename) }}">
+      <script>
+        setTimeout(() => document.body.innerHTML = "<h2 style='color:red;'>內容已自動銷毀</h2>", 10000);
+      </script>
+    {% elif filetype.startswith('video') %}
+      <video src="{{ url_for('static', filename='media/' + filename) }}" controls autoplay></video>
+      <script>
+        const vid = document.querySelector('video');
+        vid.onended = () => {
+          document.body.innerHTML = "<h2 style='color:red;'>內容已自動銷毀</h2>";
+        };
+      </script>
+    {% endif %}
+  {% endif %}
+
+</body>
+</html>
