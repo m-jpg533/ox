@@ -1,0 +1,408 @@
+<!-- <!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <title>點擊影片後字幕打字</title>
+  <style>
+    body {
+      background-color: #FFB415;
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .video-container {
+      position: relative;
+      width: 90%;
+      max-width: 720px;
+      height: 405px;
+      margin-bottom: 20px;
+    }
+
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+
+    #overlay {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.3);
+      cursor: pointer;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 24px;
+      font-weight: bold;
+    }
+
+    #subtitle {
+      max-width: 720px;
+      white-space: pre-wrap;
+      background: rgba(255, 255, 255, 0.8);
+      padding: 15px;
+      border-radius: 10px;
+      font-size: 18px;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="video-container">
+    <iframe id="ytplayer" src="https://www.youtube.com/embed/sLLcf1mSAoo?enablejsapi=1" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+    <div id="overlay">點擊開始播放</div>
+  </div>
+
+  <div id="subtitle"></div>
+
+  <script>
+    const text = `<!-- 嗯，從我走路的姿勢就能看出來
+我是個女人的男人，沒時間說話
+音樂響亮，女人熱情如火
+我從出生就被欺負
+現在好了，沒事了
+你或許會視而不見
+但我們可以試著理解
+《紐約時報》對男人的影響
+無論你是兄弟還是母親
+你都活著，活著
+感受城市崩塌，人人顫抖
+而我們活著，活著
+啊啊啊啊，活著，活著
+啊哈哈哈，活下去
+哦，當你行走的時候
+好吧，現在我時而低沉，時而亢奮
+如果我做不到，我就會努力
+我的鞋子上裝著天堂的翅膀
+我是一個舞者，我不能輸
+你知道一切都會好起來的
+我會活著，見證新的一天
+我們可以試著去理解
+《紐約時報》對人類的影響
+無論你是兄弟還是母親
+你都活著，活著
+感受這座城市的破碎，每個人都在顫抖
+而我們活著，活著
+啊啊啊啊，活著，活著
+啊，啊，啊，活著
+哦
+人生無路可走，誰來幫幫我
+誰來幫幫我，耶
+人生無路可走，誰來幫幫我，耶
+我還活著
+嗯，從我走路的樣子就能看出來
+我是個女人的男人，沒時間說話
+音樂響亮，女人熱情
+我從出生起就被踢來踢去
+但現在沒事了，沒關係
+你可以把目光轉向別處
+我們可以試著理解
+《紐約時報》對男人的影響
+無論你是兄弟或無論你是否為人母親
+你都要活著，活著
+感受城市崩塌，人人顫抖
+而我們還要活著，活著
+啊啊啊啊啊，活著，活著
+啊啊啊，活著
+生命無處可去，誰能幫幫我
+誰能幫幫我，耶
+生命無處可去，誰能幫幫我，耶
+我還活著
+生命無處可去，誰能幫幫我
+誰能幫幫我，耶
+生命無處可去，誰能幫幫我，耶
+我還活著
+生命無處可去誰來幫幫我
+誰來幫幫我 耶`; -->
+
+    let player;
+    let index = 0;
+    let typingInterval;
+
+    // 建立 YouTube API 播放器
+    function onYouTubeIframeAPIReady() {
+      player = new YT.Player('ytplayer');
+    }
+
+    // 載入 YouTube API 腳本
+    const tag = document.createElement('script');
+    tag.src = "https://www.youtube.com/iframe_api";
+    document.body.appendChild(tag);
+
+    // 點擊遮罩後開始播放影片與字幕打字
+    document.getElementById('overlay').addEventListener('click', () => {
+      if (player) {
+        player.playVideo();
+        player.unMute();  // 確保解除靜音
+        document.getElementById('overlay').style.display = 'none';
+
+        // 顯示並開始字幕打字效果
+        const subtitle = document.getElementById('subtitle');
+        subtitle.textContent = "";
+        subtitle.style.display = "block";
+        index = 0;
+
+        typingInterval = setInterval(() => {
+          if (index < text.length) {
+            subtitle.textContent += text.charAt(index);
+            index++;
+          } else {
+            clearInterval(typingInterval);
+          }
+        }, 50);
+      }
+    });
+  </script>
+</body>
+</html>
+ -->
+ <!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>打字字幕影片</title>
+  <style>
+    body {
+      background-color: #ffe3f3;
+      font-family: "Comic Sans MS", "DFKai-SB", cursive;
+      margin: 0;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .video-container {
+      position: relative;
+      width: 100%;
+      max-width: 720px;
+      aspect-ratio: 16 / 9;
+      margin-bottom: 10px;
+    }
+
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+
+    #overlay {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(255, 182, 193, 0.5);
+      cursor: pointer;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 6vw;
+      font-weight: bold;
+      text-align: center;
+      padding: 10px;
+      border-radius: 20px;
+    }
+
+    #subtitle {
+      max-width: 90%;
+      background: rgba(255, 255, 255, 0.9);
+      padding: 20px;
+      border-radius: 20px;
+      font-size: 5vw;
+      white-space: pre-wrap;
+      display: none;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    #subtitle span {
+      color: inherit;
+    }
+
+    #progressContainer {
+      width: 100%;
+      max-width: 720px;
+      height: 10px;
+      background: #eee;
+      border-radius: 5px;
+      margin-top: 10px;
+    }
+
+    #progressBar {
+      height: 100%;
+      width: 0%;
+      background: #f06292;
+      border-radius: 5px;
+    }
+
+    #timeLabel {
+      margin-top: 5px;
+      font-size: 0.9rem;
+      color: #444;
+    }
+  </style>
+</head>
+<body>
+  <div class="video-container">
+    <iframe id="ytplayer"
+      src="https://www.youtube.com/embed/sLLcf1mSAoo?enablejsapi=1"
+      title="YouTube video player"
+      frameborder="0"
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+      allowfullscreen>
+    </iframe>
+    <div id="overlay">點我播放影片與字幕</div>
+  </div>
+
+  <div id="subtitle"></div>
+  <div id="progressContainer">
+    <div id="progressBar"></div>
+  </div>
+  <div id="timeLabel">00:00 / 00:00</div>
+
+  <script>
+    const subtitles = [
+      { time: 15, text: "嗯，從我走路的姿勢就能看出來", color: "#d32f2f" },
+      { time: 17, text: "我是個女人的男人，沒時間說話", color: "#1976d2" },
+      { time: 19, text: "音樂響亮，女人熱情如火", color: "#388e3c" },
+      { time: 22, text: "我從出生就被欺負", color: "#f57c00" },
+      { time: 25, text: "現在好了，沒事了", color: "#7b1fa2" },
+      { time: 28, text: "你或許會視而不見", color: "#c2185b" },
+      { time: 31, text: "但我們可以試著理解", color: "#512da8" },
+      { time: 33, text: "《紐約時報》對男人的影響", color: "#0097a7" },
+      { time: 35, text: "無論你是兄弟還是母親", color: "#455a64" },
+      { time: 38, text: "你都活著，活著", color: "#689f38" },
+      
+      { time: 68, text: "感受城市崩塌，人人顫抖", color: "#e64a19" },
+      { time: 71, text: "而我們活著，活著", color: "#0288d1" },
+      { time: 74, text: "啊啊啊啊，活著，活著", color: "#f06292" },
+      { time: 77, text: "啊哈哈哈，活下去", color: "#ab47bc" },
+      { time: 80, text: "哦，當你行走的時候", color: "#009688" },
+      { time: 83, text: "好吧，現在我時而低沉，時而亢奮", color: "#ef6c00" },
+      { time: 88, text: "如果我做不到，我就會努力", color: "#3949ab" },
+      { time: 93, text: "我的鞋子上裝著天堂的翅膀", color: "#e91e63" },
+      { time: 98, text: "我是一個舞者，我不能輸", color: "#5d4037" },
+      { time: 101, text: "你知道一切都會好起來的", color: "#00796b" },
+      { time: 104, text: "我會活著，見證新的一天", color: "#f44336" },
+      { time: 107, text: "我們可以試著去理解", color: "#3f51b5" },
+      { time: 110, text: "《紐約時報》對人類的影響", color: "#8e24aa" },
+      { time: 113, text: "無論你是兄弟還是母親", color: "#009688" },
+      { time:117, text: "你都活著，活著", color: "#ab47bc" },
+      
+      { time:147, text: "感受這座城市的破碎，每個人都在顫抖", color: "#009688" },
+      { time: 150, text: "而我們活著，活著", color: "#ef6c00" },
+      { time: 153, text: "啊啊啊啊，活著，活著", color: "#3949ab" },
+      { time: 156, text: "啊，啊，啊，活著", color: "#e91e63" },
+      { time: 159, text: "哦", color: "#5d4037" },
+      { time: 162, text: "人生無路可走，誰來幫幫我", color: "#00796b" },
+      { time: 165, text: "誰來幫幫我，耶", color: "#f44336" },
+      { time: 168, text: "人生無路可走，誰來幫幫我，耶", color: "#3f51b5" },
+      { time: 171, text: "我還活著", color: "#8e24aa" },
+      { time: 174, text: "嗯，從我走路的樣子就能看出來", color: "#f44336" },
+      { time: 177, text: "我是個女人的男人，沒時間說話", color: "#3f51b5" },
+      { time: 180, text: "音樂響亮，女人熱情", color: "#8e24aa" },
+      { time: 183, text: "我從出生起就被踢來踢去", color: "#009688" },
+       { time:188, text: "但現在沒事了，沒關係", color: "#ab47bc" },
+      { time: 191, text: "你可以把目光轉向別處", color: "#009688" },
+      { time: 194, text: "我們可以試著理解", color: "#ef6c00" },
+      { time: 197, text: "《紐約時報》對男人的影響", color: "#3949ab" },
+      { time: 200, text: "無論你是兄弟或無論你是否為人母親", color: "#e91e63" },
+      { time: 203, text: "你都要活著，活著", color: "#5d4037" },
+      
+      { time: 233, text: "感受城市崩塌，人人顫抖", color: "#00796b" },
+      { time: 237, text: "而我們還要活著，活著", color: "#f44336" },
+      { time: 240, text: "啊啊啊啊啊，活著，活著", color: "#3f51b5" },
+      { time: 243, text: "啊啊啊，活著", color: "#8e24aa" },
+      { time: 246, text: "生命無處可去，誰能幫幫我", color: "#ab47bc" },
+      { time: 249, text: "誰能幫幫我，耶", color: "#009688" },
+      { time: 252, text: "生命無處可去，誰能幫幫我，耶", color: "#ef6c00" },
+      { time: 255, text: "我還活著", color: "#3949ab" },
+      { time: 258, text: "生命無處可去，誰能幫幫我", color: "#e91e63" },
+      { time: 261, text: "誰能幫幫我，耶", color: "#5d4037" },
+      { time: 264, text: "生命無處可去，誰能幫幫我，耶", color: "#00796b" },
+      { time: 267, text: "我還活著", color: "#f44336" },
+      { time: 270, text: "誰來幫幫我 耶", color: "#3f51b5" }
+    ];
+
+      // 可繼續補上更多字幕條目
+    
+
+    let player;
+    let lastIndex = -1;
+    let typingTimer;
+    const subtitleElement = document.getElementById('subtitle');
+    const progressBar = document.getElementById('progressBar');
+    const timeLabel = document.getElementById('timeLabel');
+
+    function onYouTubeIframeAPIReady() {
+      player = new YT.Player('ytplayer');
+    }
+
+    const tag = document.createElement('script');
+    tag.src = "https://www.youtube.com/iframe_api";
+    document.body.appendChild(tag);
+
+    document.getElementById('overlay').addEventListener('click', () => {
+      if (player) {
+        player.playVideo();
+        player.unMute();
+        document.getElementById('overlay').style.display = 'none';
+        subtitleElement.style.display = 'block';
+
+        setInterval(() => {
+          const currentTime = player.getCurrentTime();
+          const duration = player.getDuration();
+          
+          if (!isNaN(currentTime) && duration > 0) {
+            const percent = (currentTime / duration) * 100;
+            progressBar.style.width = percent + '%';
+            timeLabel.textContent = formatTime(currentTime) + ' / ' + formatTime(duration);
+          }
+
+          for (let i = 0; i < subtitles.length; i++) {
+            if (currentTime >= subtitles[i].time && i > lastIndex) {
+              lastIndex = i;
+              typeText(subtitles[i].text, subtitles[i].color);
+              break;
+            }
+          }
+        }, 300);
+      }
+    });
+
+    function typeText(text, color) {
+      clearInterval(typingTimer);
+      subtitleElement.innerHTML = "";
+      let index = 0;
+      typingTimer = setInterval(() => {
+        if (index < text.length) {
+          const span = document.createElement("span");
+          span.style.color = color;
+          span.textContent = text.charAt(index);
+          subtitleElement.appendChild(span);
+          index++;
+        } else {
+          clearInterval(typingTimer);
+        }
+      }, 120);
+    }
+
+    function formatTime(seconds) {
+      const m = Math.floor(seconds / 60);
+      const s = Math.floor(seconds % 60);
+      return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+    }
+  </script>
+</body>
+</html>
