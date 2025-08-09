@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>打字字幕影片</title>
+  <style>
+    body {
+      background-color: #ffe3f3;
+      font-family: "Comic Sans MS", "DFKai-SB", cursive;
+      margin: 0;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .video-container {
+      position: relative;
+      width: 100%;
+      max-width: 720px;
+      aspect-ratio: 16 / 9;
+      margin-bottom: 20px;
+    }
+
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+
+    #overlay {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(255, 182, 193, 0.5);
+      cursor: pointer;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 6vw;
+      font-weight: bold;
+      text-align: center;
+      padding: 10px;
+      border-radius: 20px;
+    }
+
+    #subtitle {
+      max-width: 90%;
+      background: rgba(255, 255, 255, 0.9);
+      padding: 20px;
+      border-radius: 20px;
+      font-size: 5vw;
+      white-space: pre-wrap;
+      display: none;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    #subtitle span {
+      color: inherit;
+    }
+
+    /* 進度條樣式 */
+    .progress-container {
+      width: 90%;
+      max-width: 720px;
+      height: 12px;
+      background: #ffddee;
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: 10px;
+      box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
+    }
+
+    #progress-bar {
+      height: 100%;
+      width: 0%;
+      background-color: #ff66aa;
+      transition: width 0.3s;
+    }
+
+    #time-label {
+      font-size: 14px;
+      color: #555;
+      margin-bottom: 20px;
+      font-family: monospace;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="video-container">
+    <iframe id="ytplayer"
+      src="https://www.youtube.com/embed/-Dt6tYYzmHA?enablejsapi=1"
+      title="YouTube video player"
+      frameborder="0"
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+      referrerpolicy="strict-origin-when-cross-origin"
+      allowfullscreen>
+    </iframe>
+    <div id="overlay">點我播放影片與字幕</div>
+  </div>
+
+  <!-- 進度條與時間 -->
+  <div class="progress-container">
+    <div id="progress-bar"></div>
+  </div>
+  <div id="time-label">00:00 / 00:00</div>
+
+  <!-- 字幕區 -->
+  <div id="subtitle"></div>
+
+  <script>
+    const subtitles = [
+   
+{ time: 30, text: "你喔", color: "#1976d2" },
+{ time: 33, text: "酒", color: "#388e3c" },
+{ time: 36, text: "馬上啟程", color: "#f57c00" },
+{ time: 41, text: "去", color: "#7b1fa2" },
+
+{ time: 44, text: "淚水", color: "#c2185b" },
+{ time: 47, text: "掉落的聲音", color: "#512da8" },
+
+{ time: 54, text: "在鄉村風格的居酒屋", color: "#0097a7" },
+{ time: 61, text: "一個女人的寂寞", color: "#455a64" },
+{ time: 67, text: "而已", color: "#689f38" },
+
+{ time: 71, text: "啊 你啊", color: "#e64a19" },
+
+{ time: 77, text: "想念的下雨夜晚", color: "#0288d1" },
+
+
+{ time: 98, text: "撕掉標籤", color: "#f06292" },
+{ time: 103, text: "的", color: "#ab47bc" },
+{ time: 105, text: "秋天的", color: "#009688" },
+{ time: 113, text: "海苔", color: "#ef6c00" },
+{ time: 115, text: "雜", color: "#3949ab" },
+{ time: 117, text: "花", color: "#e91e63" },
+
+
+{ time: 123, text: "故事像女人的人生", color: "#5d4037" },
+{ time: 130, text: "感覺和我很像，心就軟了", color: "#00796b" },
+{ time: 136, text: "下來", color: "#f44336" },
+{ time: 140, text: "啊 回去", color: "#3f51b5" },
+{ time: 143, text: "不想", color: "#8e24aa" },
+{ time: 147, text: "的下雨夜", color: "#009688" },
+{ time: 150, text: "我家", color: "#ef6c00" },
+
+{ time: 181, text: "門簾搖曳", color: "#3949ab" },
+{ time: 185, text: "時", color: "#e91e63" },
+{ time: 188, text: "揮手", color: "#5d4037" },
+
+{ time: 193, text: "回家", color: "#00796b" },
+{ time: 196, text: "悲傷的習慣", color: "#f44336" },
+{ time: 199, text: "養成了", color: "#3f51b5" },
+{ time: 206, text: "延續夢想", color: "#8e24aa" },
+{ time: 210, text: "小酒杯", color: "#009688" },
+{ time: 213, text: "中的酒是留戀的誘惑", color: "#ef6c00" },
+{ time: 219, text: "水", color: "#3949ab" },
+{ time: 223, text: "阿姬", color: "#e91e63" },
+{ time: 226, text: "愛", color: "#5d4037" },
+{ time: 229, text: "的下雨夜", color: "#00796b" },
+
+
+    ];
+
+    let player;
+    let lastIndex = -1;
+    let typingTimer;
+    const subtitleElement = document.getElementById('subtitle');
+
+    function onYouTubeIframeAPIReady() {
+      player = new YT.Player('ytplayer');
+    }
+
+    const tag = document.createElement('script');
+    tag.src = "https://www.youtube.com/iframe_api";
+    document.body.appendChild(tag);
+
+    document.getElementById('overlay').addEventListener('click', () => {
+      if (player) {
+        player.playVideo();
+        player.unMute();
+        document.getElementById('overlay').style.display = 'none';
+        subtitleElement.style.display = 'block';
+
+        setInterval(() => {
+          const currentTime = player.getCurrentTime();
+          const duration = player.getDuration();
+
+          // 更新進度條
+          const progressPercent = (currentTime / duration) * 100;
+          document.getElementById('progress-bar').style.width = progressPercent + "%";
+
+          // 更新時間顯示
+          const formatTime = (t) => {
+            const m = Math.floor(t / 60).toString().padStart(2, "0");
+            const s = Math.floor(t % 60).toString().padStart(2, "0");
+            return `${m}:${s}`;
+          };
+          document.getElementById('time-label').textContent = `${formatTime(currentTime)} / ${formatTime(duration)}`;
+
+          // 顯示字幕
+          for (let i = 0; i < subtitles.length; i++) {
+            if (currentTime >= subtitles[i].time && i > lastIndex) {
+              lastIndex = i;
+              typeText(subtitles[i].text, subtitles[i].color);
+              break;
+            }
+          }
+        }, 300);
+      }
+    });
+
+    function typeText(text, color) {
+      clearInterval(typingTimer);
+      subtitleElement.innerHTML = "";
+      let index = 0;
+      typingTimer = setInterval(() => {
+        if (index < text.length) {
+          const span = document.createElement("span");
+          span.style.color = color;
+          span.textContent = text.charAt(index);
+          subtitleElement.appendChild(span);
+          index++;
+        } else {
+          clearInterval(typingTimer);
+        }
+      }, 120);
+    }
+  </script>
+</body>
+</html>
