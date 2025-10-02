@@ -1,0 +1,140 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <title>捷運跑馬燈模擬器</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: black;
+      color: blue;
+      font-family: "Microsoft JhengHei", sans-serif;
+      text-align: center;
+      overflow: hidden;
+    }
+    .train {
+      position: relative;
+      width: 100%;
+      height: 100vh;
+      background: url("https://tse1.mm.bing.net/th/id/OIP.QZNIRBu9YMuwgxewtHkGFgHaDw?pid=Api&rs=1&c=1&qlt=95&w=206&h=104") no-repeat center;
+      background-size: cover;
+    }
+    .marquee {
+      position: absolute;
+      bottom: 20px;
+      width: 100%;
+      white-space: nowrap;
+      overflow: hidden;
+    }
+    .marquee span {
+      display: inline-block;
+      padding-left: 100%;
+      font-size: 40px;
+      color: bule;
+      animation: scroll 12s linear infinite;
+    }
+    @keyframes scroll {
+      0% { transform: translateX(0%); }
+      100% { transform: translateX(-100%); }
+    }
+    .announce {
+      position: absolute;
+      top: 35%;
+      width: 100%;
+      font-size: 65px;
+      font-weight: bold;
+      color: red;
+      text-shadow: 2px 2px 5px black;
+      animation: flash 1s infinite;
+    }
+    @keyframes flash {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+    .start-btn {
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 22px;
+      padding: 12px 24px;
+      background: yellow;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="train">
+    <button id="startBtn" class="start-btn">開始模擬</button>
+    <div id="announce" class="announce">歡迎搭乘台北捷運</div>
+    <div class="marquee">
+      <span id="marqueeText">Welcome to Taipei Metro!</span>
+    </div>
+  </div>
+
+  <script>
+    const stations = [
+      ["淡水", "Tamsui"], ["紅樹林", "Hongshulin"], ["竹圍", "Zhuwei"], ["關渡", "Guandu"],
+      ["忠義", "Zhongyi"], ["復興崗", "Fuxinggang"], ["北投", "Beitou"], ["奇岩", "Qiyan"],
+      ["唭哩岸", "Qilian"], ["石牌", "Shipai"], ["明德", "Mingde"], ["芝山", "Zhishan"],
+      ["士林", "Shilin"], ["劍潭", "Jiantan"], ["圓山", "Yuanshan"], ["民權西路", "Minquan W. Rd."],
+      ["雙連", "Shuanglian"], ["中山", "Zhongshan"], ["台北車站", "Taipei Main Station"],
+      ["台大醫院", "NTU Hospital"], ["中正紀念堂", "Chiang Kai-Shek Memorial Hall"],
+      ["東門", "Dongmen"], ["大安森林公園", "Daan Park"], ["大安", "Daan"],
+      ["信義安和", "Xinyi Anhe"], ["台北101/世貿", "Taipei 101 / World Trade Center"], ["象山", "Xiangshan"]
+    ];
+
+    let index = 0;
+    let forward = true;
+    let intervalId;
+
+    function announceStation() {
+      const [ch, en] = stations[index];
+      const announceEl = document.getElementById("announce");
+      const marqueeEl = document.getElementById("marqueeText");
+
+      announceEl.innerText = `下一站 Next Stop: ${ch} (${en})`;
+      marqueeEl.innerText = `本列車即將到達 ${ch}站. Next Stop: ${en} Station.`;
+
+      // 中文播報
+      let utterCh = new SpeechSynthesisUtterance(`下一站，${ch}站。`);
+      utterCh.lang = "zh-TW";
+
+      // 英文播報
+      let utterEn = new SpeechSynthesisUtterance(`Next stop, ${en} Station.`);
+      utterEn.lang = "en-US";
+
+      speechSynthesis.speak(utterCh);
+      speechSynthesis.speak(utterEn);
+
+      // 下一站
+      if (forward) {
+        index++;
+        if (index >= stations.length) {
+          index = stations.length - 2;
+          forward = false;
+        }
+      } else {
+        index--;
+        if (index < 0) {
+          index = 1;
+          forward = true;
+        }
+      }
+    }
+
+    document.getElementById("startBtn").addEventListener("click", () => {
+      if (intervalId) clearInterval(intervalId);
+      announceStation(); // 先播一次
+      intervalId = setInterval(announceStation, 6000); // 每 6 秒播報
+      document.getElementById("startBtn").style.display = "none"; 
+    });
+  </script>
+</body>
+</html>
+
