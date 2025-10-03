@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>捷運跑馬燈 + 雙語報站</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: black;
+      color: yellow;
+      font-family: "Microsoft JhengHei", sans-serif;
+      overflow: hidden;
+      text-align: center;
+    }
+    .train {
+      position: relative;
+      width: 100%;
+      height: 100vh;
+      background: url("http://www.pngmart.com/files/7/Train-Rail-PNG-Picture.png") no-repeat center;
+      background-size: cover;
+    }
+    .marquee-container {
+      position: absolute;
+      bottom: 30px;
+      width: 100%;
+      overflow: hidden;
+      white-space: nowrap;
+    }
+    .marquee-text {
+      display: inline-block;
+      font-size: 36px; /* 字體放大 */
+      color: yellow;
+      animation: marquee 10s linear infinite;
+    }
+    @keyframes marquee {
+      from { transform: translateX(100%); }
+      to { transform: translateX(-100%); }
+    }
+    .announce {
+      position: absolute;
+      top: 30%;
+      width: 100%;
+      font-size: 60px;
+      font-weight: bold;
+      color: red;
+      text-shadow: 2px 2px 5px black;
+      animation: flash 1.2s infinite;
+    }
+    @keyframes flash {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+    .start-btn {
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 24px;
+      padding: 12px 24px;
+      background: yellow;
+      color: black;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      z-index: 1000;
+    }
+  </style>
+</head>
+<body>
+  <div class="train">
+    <button id="startBtn" class="start-btn">▶ 開始模擬</button>
+    <div id="announce" class="announce">歡迎搭乘台北捷運</div>
+    <div class="marquee-container">
+      <span id="msg" class="marquee-text">🚇 歡迎搭乘捷運，下一站 淡水 / Next Stop: Tamsui</span>
+    </div>
+  </div>
+
+  <script>
+    const stations = [
+      ["淡水", "Tamsui"],
+      ["紅樹林", "Hongshulin"],
+      ["竹圍", "Zhuwei"],
+      ["關渡", "Guandu"],
+      ["忠義", "Zhongyi"],
+      ["復興崗", "Fuxinggang"],
+      ["北投", "Beitou"],
+      ["奇岩", "Qiyan"],
+      ["唭哩岸", "Qilian"],
+      ["石牌", "Shipai"],
+      ["明德", "Mingde"],
+      ["芝山", "Zhishan"],
+      ["士林", "Shilin"],
+      ["劍潭", "Jiantan"],
+      ["圓山", "Yuanshan"],
+      ["民權西路", "Minquan W. Rd."],
+      ["雙連", "Shuanglian"],
+      ["中山", "Zhongshan"],
+      ["台北車站", "Taipei Main Station"],
+      ["台大醫院", "NTU Hospital"],
+      ["中正紀念堂", "Chiang Kai-Shek Memorial Hall"],
+      ["東門", "Dongmen"],
+      ["大安森林公園", "Daan Park"],
+      ["大安", "Daan"],
+      ["信義安和", "Xinyi Anhe"],
+      ["台北101/世貿", "Taipei 101 / World Trade Center"],
+      ["象山", "Xiangshan"]
+    ];
+
+    let index = 0;
+    let direction = 1;
+    let intervalId = null;
+
+    function speakDual(ch, en) {
+      // 中文
+      let uttZh = new SpeechSynthesisUtterance(`下一站，${ch}站。`);
+      uttZh.lang = "zh-TW";
+      speechSynthesis.speak(uttZh);
+      // 英文
+      let uttEn = new SpeechSynthesisUtterance(`Next stop, ${en} station.`);
+      uttEn.lang = "en-US";
+      speechSynthesis.speak(uttEn);
+    }
+
+    function updateDisplay() {
+      const [ch, en] = stations[index];
+      const announceEl = document.getElementById("announce");
+      const msgEl = document.getElementById("msg");
+
+      announceEl.innerText = `下一站 Next Stop: ${ch} (${en})`;
+      msgEl.innerText = `🚇 歡迎搭乘捷運，下一站 ${ch} / Next Stop: ${en}`;
+
+      // 語音播報
+      speakDual(ch, en);
+
+      // 換下一站
+      index += direction;
+      if (index >= stations.length) {
+        index = stations.length - 2;
+        direction = -1;
+      }
+      if (index < 0) {
+        index = 1;
+        direction = 1;
+      }
+    }
+
+    document.getElementById("startBtn").addEventListener("click", () => {
+      if (intervalId) {
+        clearInterval(intervalId);
+      }
+      updateDisplay();  // 先播一次
+      intervalId = setInterval(updateDisplay, 6000);  // 每 6 秒換站
+      document.getElementById("startBtn").style.display = "none";
+    });
+  </script>
+</body>
+</html>
