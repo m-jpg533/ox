@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <title>紅點沿直線動畫（HTML + JS）</title>
+  <style>
+    body { font-family: Arial, "Microsoft JhengHei", sans-serif; margin: 20px; background:#fafafa; }
+    #canvasWrap { border: 1px solid #ddd; display:inline-block; background: #fff; }
+    #controls { margin-top: 12px; }
+    label { margin-right: 8px; }
+    input[type=range] { vertical-align: middle; }
+    .info { margin-top:8px; color:#333; }
+    .small { font-size:0.9em; color:#666; }
+  </style>
+</head>
+<body>
+  <h2>紅點沿固定直線跑（HTML + JavaScript）</h2>
+
+  <div id="canvasWrap">
+    <canvas id="canvas" width="900" height="500"></canvas>
+  </div>
+
+  <div id="controls">
+    <label>斜率 w：<input id="wInput" type="number" value="2" step="0.1" /></label>
+    <label>截距 b：<input id="bInput" type="number" value="3" step="0.1" /></label>
+    <label>速度 speed：<input id="speedInput" type="range" min="1" max="200" value="60" /></label>
+    <span id="speedVal">60</span>
+    <button id="toggleDir">方向：來回</button>
+    <button id="pauseBtn">暫停</button>
+    <button id="resetBtn">重設位置</button>
+  </div>
+
+  <div class="info">
+    <div>說明：紅點會沿著直線 <code>y = w·x + b</code> 左右往返掃描。可調速度、斜率與截距。</div>
+    <div class="small">（若要把畫面嵌到 GitHub Pages，把此檔案放進 repo 並啟用 Pages 即可）</div>
+  </div>
+
+  <script>
+    // 取得畫布與上下文
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+
+    // 控制元素
+    const wInput = document.getElementById('wInput');
+    const bInput = document.getElementById('bInput');
+    const speedInput = document.getElementById('speedInput');
+    const speedVal = document.getElementById('speedVal');
+    const toggleDirBtn = document.getElementById('toggleDir');
+    const pauseBtn = document.getElementById('pauseBtn');
+    const resetBtn = document.getElementById('resetBtn');
+
+    // 畫布座標到數學座標的映射（線性）
+    const margin = 50;
+    const xMin = -10, xMax = 10;   // 對應數學 x 範圍
+    const width = canvas.width, height = canvas.height;
+    const plotWidth = width - margin*2;
+    const plotHeight = height - margin*2;
+
+    function xToCanvas(x) {
+      return margin + ( (x - xMin) / (xMax - xMin) ) * plotWidth;
+    }
+    function yToCanvas(y) {
+      // 在畫布上 y 向下增加，而數學 y 向上，需反轉
+      // map math y range determined by view (calculate later)
+      return margin + (1 - (y - yMin) / (yMax - yMin)) * plotHeight;
+    }
+
+    // 初始參數
+    let w = parseFloat(wInput.value);
+    let b = parseFloat(bInput.value);
+    let speed = parseFloat(speedInput.value); // pixel steps per second-ish
+    let mode = 'pingpong'; // 'pingpong' 或 'wrap' (單向到盡頭瞬間回頭)
+    let running = true;
+
+    // 計算數學 y 範圍以包住整條線（視窗裡）
+    // 在 xMin..xMax 上的 y 值範圍是 min/max of w*x+b
+    function computeYRange() {
+      const ys = [w * xMin + b, w * xMax + b];
+      let yminLocal = Math.min(...ys), ymaxLocal = Math.max(...ys);
+      const pad = (ymaxLocal - yminLocal) * 0.25 || 1;
+      yminLocal -= pad; ymaxLocal += pad;
+      return [yminLocal, ymaxLocal];
+    }
+
+    let [yMin, yMax] = computeYRange();
+
+    // 畫格、坐標與固定線
+    function drawAxesAndLine() {
+      ctx.clearRect(0,0,width,height);
+      // 背景
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0,0,width,height);
+
+      // 網格
+      ctx.strokeStyle = '#eee';
+      ctx.lineWidth = 1;
+      for (let i = 0; i <= 10; i++) {
+        // vertical grid
+        const xPos = margin + i * (plotWidth / 10);
+        ctx.beginPath();
+        ctx.moveTo(xPos, margin);
+        ctx.lineTo(xPos, height - margin);
+        ctx.stroke();
+      }
+      for (let j = 0; j <= 10; j++) {
+        const yPos = margin + j * (plotHeight / 10);
+        ctx.beginPath();
+        ctx.moveTo(margin, yPos);
+        ctx.lineTo(width - margin, yPos);
+        ctx.stroke();
+      }
+
+      // 坐標軸 (x=0, y=0)
+      // x=0 line
+      ctx.strokeStyle = '#999';
+      ctx.lineWidth = 1.2;
+      if (xMin < 0 && 0 < xMax) {
+        const cx = xToCanvas(0);
+        ctx.beginPath();
+        ctx.moveTo(cx, margin);
+        ctx.lineTo(cx, height - margin);
+        ctx.stroke();
+      }
+      // y=0 line
+      if (yMin < 0 && 0 < yMax) {
+        const cy = yToCanvas(0);
+        ctx.beginPath();
+        ctx.moveTo(margin, cy);
+        ctx.lineTo(width - margin, cy);
+        ctx.stroke();
+      }
+
+      // 畫直線 y = w*x + b
+      ctx.strokeStyle = 'green';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      for (let i = 0; i <= 200; i++){
+        const t = i / 200;
+        const xv = xMin + t * (xMax - xMin);
+        const yv = w * xv + b;
+        const cx = xToCanvas(xv);
+        const cy = yToCanvas(yv);
+        if (i === 0) ctx.moveTo(cx, cy); else ctx.lineTo(cx, cy);
+      }
+      ctx.stroke();
+
+      // 標示公式
+      ctx.fillStyle = '#333';
+      ctx.font = '14px "Microsoft JhengHei", Arial';
+      ctx.fillText(`y = ${w} x + ${b}`, margin + 6, margin + 16);
+    }
+
+    // 紅點位置使用參數 t (0..1)，0 對應 xMin，1 對應 xMax
+    let t = 0;           // 當前參數 [0,1]
+    let dir = 1;         // 1 = 往右, -1 = 往左
+
+    // 時間控制
+    let lastTime = performance.now();
+
+    function animate(now) {
+      if (!running) {
+        lastTime = now;
+        requestAnimationFrame(animate);
+        return;
+      }
+      const dt = (now - lastTime) / 1000; // 秒
+      lastTime = now;
+
+      // 根據 speed 與畫面寬度調整 t 的增量
+      // speed 控制每秒跨越多少個 x-index，相對於畫面我們轉成 t 速率
+      // 我們把 speed 解釋為 "每秒移動 speed 數學座標單位"
+      const xRange = xMax - xMin;
+      const tSpeed = (speed * dt) / xRange * dir; // 方向決定增減
+
+      t += tSpeed;
+
+      if (mode === 'pingpong') {
+        if (t >= 1) { t = 1; dir = -1; }
+        if (t <= 0) { t = 0; dir = 1; }
+      } else { // wrap: 到頭瞬間回頭 (跳回起點)
+        if (t >= 1) t = 0;
+      }
+
+      // 計算紅點實際座標
+      const xVal = xMin + t * (xMax - xMin);
+      const yVal = w * xVal + b;
+
+      // 重算 y 範圍並畫圖（若 w,b 調整了）
+      [yMin, yMax] = computeYRange();
+      drawAxesAndLine();
+
+      // 畫紅點
+      const cx = xToCanvas(xVal);
+      const cy = yToCanvas(yVal);
+      ctx.beginPath();
+      ctx.fillStyle = 'red';
+      ctx.arc(cx, cy, 6, 0, Math.PI*2);
+      ctx.fill();
+
+      // 顯示座標資訊
+      ctx.fillStyle = '#333';
+      ctx.font = '13px "Microsoft JhengHei", Arial';
+      ctx.fillText(`x=${xVal.toFixed(2)}, y=${yVal.toFixed(2)}`, margin + 6, height - margin + 18);
+
+      requestAnimationFrame(animate);
+    }
+
+    // 初始化畫面
+    drawAxesAndLine();
+    lastTime = performance.now();
+    requestAnimationFrame(animate);
+
+    // 控制器互動
+    speedInput.addEventListener('input', () => {
+      speed = parseFloat(speedInput.value);
+      speedVal.textContent = speedInput.value;
+    });
+    wInput.addEventListener('change', () => {
+      w = parseFloat(wInput.value);
+      [yMin, yMax] = computeYRange();
+      drawAxesAndLine();
+    });
+    bInput.addEventListener('change', () => {
+      b = parseFloat(bInput.value);
+      [yMin, yMax] = computeYRange();
+      drawAxesAndLine();
+    });
+
+    toggleDirBtn.addEventListener('click', () => {
+      if (mode === 'pingpong') { mode = 'wrap'; toggleDirBtn.textContent = '方向：單向回跳'; }
+      else { mode = 'pingpong'; toggleDirBtn.textContent = '方向：來回'; }
+    });
+
+    pauseBtn.addEventListener('click', () => {
+      running = !running;
+      pauseBtn.textContent = running ? '暫停' : '繼續';
+    });
+
+    resetBtn.addEventListener('click', () => {
+      t = 0; dir = 1; drawAxesAndLine();
+    });
+
+    // 初始顯示 speed 值
+    speedVal.textContent = speedInput.value;
+  </script>
+</body>
+</html>
