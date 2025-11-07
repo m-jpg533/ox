@@ -2,6 +2,7 @@
 <html lang="zh-Hant">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>🎰 豪華動畫輪盤 Roulette</title>
 <style>
   body {
@@ -10,19 +11,24 @@
     text-align: center;
     font-family: "Microsoft JhengHei", sans-serif;
     overflow-x: hidden;
+    margin: 0;
+    padding: 0;
   }
+
   h1 {
     font-size: 2.5em;
     color: gold;
     text-shadow: 2px 2px 8px #000;
     margin-top: 30px;
   }
+
   #wheelContainer {
     position: relative;
     margin: 40px auto;
     width: 400px;
     height: 400px;
   }
+
   #wheel {
     width: 100%;
     height: 100%;
@@ -31,9 +37,10 @@
     box-shadow: 0 0 25px gold, inset 0 0 25px #000;
     transition: transform 4s cubic-bezier(0.25, 0.1, 0.25, 1);
   }
+
   #pointer {
     position: absolute;
-    top: -15px;
+    top: -20px;
     left: 50%;
     transform: translateX(-50%);
     width: 0;
@@ -41,15 +48,19 @@
     border-left: 15px solid transparent;
     border-right: 15px solid transparent;
     border-bottom: 30px solid red;
+    z-index: 10;
   }
+
   #controls {
     margin-top: 20px;
   }
+
   select, input {
     font-size: 1.1em;
     padding: 5px;
     margin: 5px;
   }
+
   button {
     font-size: 1.2em;
     padding: 8px 15px;
@@ -60,36 +71,49 @@
     color: black;
     transition: 0.3s;
   }
+
   button:hover {
     background: #ffdb4d;
+    transform: scale(1.05);
   }
+
   #balance {
     font-size: 1.4em;
     margin-top: 10px;
     color: #00ff80;
     text-shadow: 0 0 8px #00ff80;
   }
+
   #message {
     font-size: 1.3em;
     margin-top: 20px;
     font-weight: bold;
     text-shadow: 0 0 10px #fff;
   }
+
   .win {
     color: gold;
     animation: blink 1s infinite;
   }
+
   .lose {
     color: red;
   }
+
   @keyframes blink {
     50% { opacity: 0.4; }
+  }
+
+  footer {
+    margin-top: 30px;
+    color: #777;
+    font-size: 0.9em;
   }
 </style>
 </head>
 <body>
 
-<h1>🎰 豪華動畫輪盤 Roulette</h1>
+<h1>🎡 豪華動畫輪盤 Roulette</h1>
 
 <div id="wheelContainer">
   <div id="pointer"></div>
@@ -103,6 +127,7 @@
   <select id="colorChoice">
     <option value="red">紅色</option>
     <option value="black">黑色</option>
+    <option value="green">綠色（高賠率）</option>
   </select>
   <label>下注金額：</label>
   <input type="number" id="betAmount" min="10" max="1000" value="100">
@@ -111,17 +136,24 @@
 
 <div id="message"></div>
 
+<audio id="spinSound" src="https://upload.wikimedia.org/wikipedia/commons/0/05/Roulette_ball_sound.mp3"></audio>
+<audio id="winSound" src="https://upload.wikimedia.org/wikipedia/commons/7/7a/Coin_sound_effect.mp3"></audio>
+
+<footer>© 2025 豪華輪盤模擬遊戲 | GitHub Pages 運行版本</footer>
+
 <script>
 const canvas = document.getElementById("wheel");
 const ctx = canvas.getContext("2d");
 const balanceDisplay = document.getElementById("balance");
 const message = document.getElementById("message");
+const spinSound = document.getElementById("spinSound");
+const winSound = document.getElementById("winSound");
 
 let playerBalance = 1000;
 let currentRotation = 0;
 let isSpinning = false;
 
-// 🎨 繪製輪盤（18 紅、18 黑、1 綠）
+// 🎨 繪製輪盤顏色區域（18 紅、18 黑、1 綠）
 const colors = [];
 for (let i = 0; i < 36; i++) colors.push(i % 2 === 0 ? "red" : "black");
 colors.push("green");
@@ -143,51 +175,61 @@ function drawWheel() {
     ctx.rotate(i * sliceAngle + sliceAngle / 2);
     ctx.textAlign = "right";
     ctx.fillStyle = "white";
-    ctx.font = "bold 16px Arial";
+    ctx.font = "bold 14px Arial";
     ctx.fillText(i, radius - 10, 5);
     ctx.restore();
   }
 }
 drawWheel();
 
-// 🎯 旋轉功能
+// 🎯 輪盤旋轉與中獎判斷
 function spin() {
   if (isSpinning) return;
   const colorChoice = document.getElementById("colorChoice").value;
   const betAmount = parseInt(document.getElementById("betAmount").value);
   if (betAmount <= 0 || betAmount > playerBalance) {
-    alert("下注金額不正確！");
+    alert("⚠️ 金額不足或下注不正確！");
     return;
   }
 
-  isSpinning = true;
-  message.textContent = "輪盤旋轉中...";
+  // 扣除下注金
+  playerBalance -= betAmount;
+  balanceDisplay.textContent = `💰 玩家金額：$${playerBalance}`;
+  message.textContent = "🎡 輪盤旋轉中...";
   message.className = "";
+  isSpinning = true;
 
-  const spinAngle = Math.random() * 360 + 360 * 5;
+  // 播放音效
+  spinSound.currentTime = 0;
+  spinSound.play();
+
+  // 隨機旋轉角度
+  const spinAngle = Math.random() * 360 + 360 * 8;
   currentRotation += spinAngle;
   canvas.style.transform = `rotate(${currentRotation}deg)`;
 
   setTimeout(() => {
     const normalized = currentRotation % 360;
     const segment = Math.floor(normalized / (360 / colors.length));
-    const resultColor = colors[(colors.length - 1 - segment) % colors.length];
+    const resultColor = colors[(colors.length - 1 - segment + colors.length) % colors.length];
 
+    // 判斷結果與賠率
+    let payout = 0;
     if (resultColor === colorChoice) {
-      const payout = betAmount * 2;
-      playerBalance -= betAmount;
-      playerBalance += betAmount;
-      message.textContent = `🎉 恭喜！中了${resultColor.toUpperCase()}！獲得 $${payout}`;
+      if (resultColor === "green") payout = betAmount * 14; // 綠色 14倍賠率
+      else payout = betAmount * 2; // 紅黑 1:1
+      playerBalance += payout;
+      message.textContent = `🎉 恭喜中獎！結果：${resultColor.toUpperCase()} 💰 贏得 $${payout}`;
       message.className = "win";
+      winSound.play();
     } else {
-      message.textContent = `😢 沒中！開出 ${resultColor.toUpperCase()}，損失 $${betAmount}`;
+      message.textContent = `😢 沒中！結果是 ${resultColor.toUpperCase()}，損失 $${betAmount}`;
       message.className = "lose";
     }
 
     balanceDisplay.textContent = `💰 玩家金額：$${playerBalance}`;
     isSpinning = false;
-
-  }, 4000);
+  }, 4200);
 }
 </script>
 
