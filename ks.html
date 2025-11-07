@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>🃏 Blackjack 21 視覺化模擬器</title>
+<style>
+  :root{
+    --bg:#0b2a2b;
+    --card-bg:#fff;
+    --card-text:#111;
+    --accent:#ffd166;
+    --muted:#a7c4c3;
+  }
+  body{
+    margin:0;
+    font-family: "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+    background: linear-gradient(180deg,var(--bg),#042427 150%);
+    color: #eef7f6;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    min-height:100vh;
+    padding:20px;
+  }
+  h1{ margin:10px 0 6px; color:var(--accent); text-shadow:0 3px 8px rgba(0,0,0,0.6); }
+  .table{
+    width:100%;
+    max-width:1000px;
+    background: rgba(255,255,255,0.03);
+    border-radius:12px;
+    padding:18px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  }
+  .top-row{ display:flex; gap:12px; align-items:center; justify-content:space-between; }
+  .info{
+    display:flex; gap:12px; align-items:center;
+  }
+  .chip{
+    background:var(--accent);
+    color:#041414;
+    padding:6px 12px;
+    border-radius:8px;
+    font-weight:700;
+  }
+  .controls{ margin-top:12px; display:flex; gap:8px; align-items:center; flex-wrap:wrap;}
+  input[type=number]{ width:110px; padding:6px 10px; border-radius:8px; border:none; }
+  button{
+    background:var(--accent);
+    color:#041414;
+    border:none;
+    padding:8px 14px;
+    border-radius:8px;
+    font-weight:700;
+    cursor:pointer;
+    box-shadow:0 4px 10px rgba(0,0,0,0.4);
+  }
+  button:disabled{ opacity:0.5; cursor:not-allowed; }
+  .board{ margin-top:18px; display:flex; gap:20px; flex-wrap:wrap; justify-content:space-between; align-items:flex-start; }
+  .hand{
+    width:calc(50% - 10px);
+    min-height:220px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+    border-radius:10px;
+    padding:12px;
+    box-sizing:border-box;
+  }
+  .hand h3{ margin:0 0 8px 0; color:var(--muted); font-weight:600; font-size:14px;}
+  .cards{ display:flex; gap:10px; min-height:120px; align-items:end; }
+  .card{
+    width:86px; height:120px; border-radius:8px; background:var(--card-bg); color:var(--card-text);
+    display:flex; flex-direction:column; justify-content:space-between; padding:8px; box-shadow:0 8px 18px rgba(0,0,0,0.4);
+    transform-origin:center center;
+    transition: transform 350ms ease, opacity 300ms ease;
+  }
+  .card.small{ width:72px; height:96px; }
+  .card .top, .card .bottom{ font-weight:700; font-size:18px; }
+  .card .suit{ font-size:24px; text-align:center; opacity:0.9; }
+  .score{ margin-top:10px; color:var(--accent); font-weight:800; }
+  .log{ margin-top:14px; background:rgba(0,0,0,0.25); padding:10px; border-radius:8px; min-height:60px; font-size:14px; color:var(--muted) }
+  .footer{ margin-top:16px; display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; color:var(--muted); font-size:13px }
+  .history{ max-height:120px; overflow:auto; padding:8px; border-radius:8px; background:rgba(255,255,255,0.02); }
+  .win { color:#b8ffb0; font-weight:800; }
+  .lose { color:#ffb0b0; font-weight:800; }
+  .push { color:#cfe9ff; font-weight:800; }
+  @media (max-width:800px){
+    .hand{ width:100%; }
+  }
+</style>
+</head>
+<body>
+
+  <h1>🃏 Blackjack 21 視覺化模擬器</h1>
+
+  <div class="table">
+    <div class="top-row">
+      <div class="info">
+        <div class="chip">玩家：guest_001</div>
+        <div id="balanceChip" class="chip">餘額 $1000</div>
+        <div style="color:var(--muted)">局數: <span id="roundCount">0</span></div>
+      </div>
+
+      <div>
+        <label>下注金額</label>
+        <input id="betInput" type="number" min="1" value="50" />
+        <button id="dealBtn">發牌 Deal</button>
+        <button id="resetBtn">重置 Reset</button>
+      </div>
+    </div>
+
+    <div class="board">
+      <div class="hand" id="dealerArea">
+        <h3>莊家 (Dealer)</h3>
+        <div class="cards" id="dealerCards"></div>
+        <div class="score" id="dealerScore">得分: -</div>
+      </div>
+
+      <div class="hand" id="playerArea">
+        <h3>玩家 (Player)</h3>
+        <div class="cards" id="playerCards"></div>
+        <div class="score" id="playerScore">得分: -</div>
+        <div style="margin-top:10px;">
+          <button id="hitBtn" disabled>要牌 Hit</button>
+          <button id="standBtn" disabled>停牌 Stand</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="log" id="message">狀態顯示在此。請先下注並按 Deal 開始。</div>
+
+    <div class="footer">
+      <div>
+        結果紀錄:
+        <div class="history" id="historyList"></div>
+      </div>
+      <div style="text-align:right">
+        <div>賠率說明: Blackjack（玩家 21）= 1.5x；一般勝利 = 1x；平手 (push) 退回下注</div>
+      </div>
+    </div>
+  </div>
+
+<script>
+/*
+  簡單 Blackjack 邏輯（單副牌，抽完可重新洗牌）
+  - A = 1 或 11（自動計算最接近但不超過 21 的點數）
+  - J,Q,K = 10
+  - 玩家可 Hit 或 Stand
+  - 莊家在 17 以下必須補牌（簡單規則）
+  - 發生 Blackjack（玩家起始牌為 A+10）則視為 Blackjack
+  - payout: blackjack 1.5x, win 1x, push 0 (退還)
+  - 所有運算都在前端（教學 / 模擬用途）
+*/
+
+// 工具與資料
+const suits = ["♠","♥","♦","♣"];
+const ranks = ["A","2","3","4","5","6","7","8","9","10","J","Q","K"];
+let deck = [];
+let playerHand = [];
+let dealerHand = [];
+let round = 0;
+let balance = 1000;
+let currentBet = 0;
+let inRound = false;
+
+// 元素
+const dealerCardsEl = document.getElementById("dealerCards");
+const playerCardsEl = document.getElementById("playerCards");
+const dealerScoreEl = document.getElementById("dealerScore");
+const playerScoreEl = document.getElementById("playerScore");
+const messageEl = document.getElementById("message");
+const dealBtn = document.getElementById("dealBtn");
+const hitBtn = document.getElementById("hitBtn");
+const standBtn = document.getElementById("standBtn");
+const betInput = document.getElementById("betInput");
+const balanceChip = document.getElementById("balanceChip");
+const historyList = document.getElementById("historyList");
+const roundCount = document.getElementById("roundCount");
+const resetBtn = document.getElementById("resetBtn");
+
+// 初始
+updateBalanceUI();
+shuffleDeck();
+
+// 事件
+dealBtn.addEventListener("click", onDeal);
+hitBtn.addEventListener("click", onHit);
+standBtn.addEventListener("click", onStand);
+resetBtn.addEventListener("click", onReset);
+
+// 建立牌堆
+function buildDeck(){
+  const arr = [];
+  for(let s of suits){
+    for(let r of ranks){
+      arr.push({suit:s, rank:r});
+    }
+  }
+  return arr;
+}
+function shuffleDeck(){
+  deck = buildDeck();
+  for(let i = deck.length -1; i>0; i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [deck[i], deck[j]] = [deck[j], deck[i]];
+  }
+}
+
+// 發一張牌
+function draw(){
+  if(deck.length ===0){
+    shuffleDeck();
+    messageEl.innerText = "牌堆已洗牌（自動重新洗）";
+  }
+  return deck.shift();
+}
+
+// 計算手牌點數（A 自動 1 或 11）
+function calcHandValue(hand){
+  let total = 0;
+  let aces = 0;
+  for(const c of hand){
+    if(c.rank === "A"){ aces++; total += 1; }
+    else if(["J","Q","K"].includes(c.rank)){ total += 10; }
+    else total += parseInt(c.rank);
+  }
+  // 將部分 A 從1轉成11（每次增加10）只要不爆（<=21）
+  for(let i=0;i<aces;i++){
+    if(total + 10 <= 21) total += 10;
+  }
+  return total;
+}
+
+// 顯示卡片（簡潔視覺化）
+function renderHands(hideDealerHole=true){
+  dealerCardsEl.innerHTML = "";
+  playerCardsEl.innerHTML = "";
+
+  // dealer
+  for(let i=0;i<dealerHand.length;i++){
+    const card = dealerHand[i];
+    const el = createCardElement(card);
+    // 如果是莊家第一張（hole card）且要隱藏
+    if(i===1 && hideDealerHole && inRound){
+      const hole = document.createElement("div");
+      hole.className="card small";
+      hole.style.background="#444";
+      hole.style.color="#222";
+      hole.style.opacity = "0.95";
+      hole.innerHTML = "<div style='font-size:18px;text-align:center;margin-top:35px;color:#999'>🂠</div>";
+      dealerCardsEl.appendChild(hole);
+    } else {
+      dealerCardsEl.appendChild(el);
+    }
+  }
+
+  // player
+  for(const c of playerHand){
+    playerCardsEl.appendChild(createCardElement(c));
+  }
+
+  // 分數顯示
+  const pVal = calcHandValue(playerHand);
+  const dVal = inRound ? "??" : calcHandValue(dealerHand);
+  playerScoreEl.innerText = `得分: ${pVal}`;
+  dealerScoreEl.innerText = `得分: ${dVal}`;
+}
+
+// 建立卡片 DOM
+function createCardElement(card){
+  const el = document.createElement("div");
+  el.className = "card small";
+  // 紅黑顏色
+  const isRed = (card.suit === "♥" || card.suit === "♦");
+  el.style.background = isRed ? "#fff0f0" : "#ffffff";
+  el.style.color = isRed ? "#900" : "#111";
+  el.innerHTML = `<div class="top">${card.rank}</div><div class="suit">${card.suit}</div><div class="bottom">${card.rank}</div>`;
+  el.style.transform = `translateY(0px)`;
+  el.style.opacity = "1";
+  return el;
+}
+
+// 玩家按 Deal
+function onDeal(){
+  if(inRound){
+    messageEl.innerText = "回合還在進行中！請先完成本局。";
+    return;
+  }
+  currentBet = parseInt(betInput.value) || 0;
+  if(currentBet <=0){ alert("請輸入有效下注金額"); return; }
+  if(currentBet > balance){ alert("餘額不足！"); return; }
+
+  // 初始化
+  playerHand = [];
+  dealerHand = [];
+  inRound = true;
+  round++;
+  roundCount.innerText = round;
+
+  // 扣押注
+  balance -= currentBet;
+  updateBalanceUI();
+
+  // 發牌： 玩家、莊家、玩家、莊家（莊家第二張為暗牌）
+  playerHand.push(draw());
+  dealerHand.push(draw());
+  playerHand.push(draw());
+  dealerHand.push(draw());
+
+  // 更新介面
+  renderHands(true);
+
+  // 檢查 Blackjack（玩家或莊家）
+  const pVal = calcHandValue(playerHand);
+  const dVal = calcHandValue(dealerHand);
+
+  if(pVal === 21){
+    // 玩家 blackjack
+    // 立刻比對莊家是否也blackjack
+    if(dVal === 21){
+      endRound("push");
+    } else {
+      endRound("player_blackjack");
+    }
+  } else if(dVal === 21){
+    // 莊家 blackjack 且玩家非 blackjack
+    endRound("dealer_blackjack");
+  } else {
+    // 正常流程，啟用按鈕
+    hitBtn.disabled = false;
+    standBtn.disabled = false;
+    dealBtn.disabled = true;
+    messageEl.innerText = "請選擇要牌（Hit）或停牌（Stand）。";
+  }
+}
+
+// 玩家按 Hit
+function onHit(){
+  if(!inRound) return;
+  playerHand.push(draw());
+  renderHands(true);
+  const pVal = calcHandValue(playerHand);
+  if(pVal > 21){
+    endRound("player_bust");
+  } else if(pVal === 21){
+    // 自動 Stand
+    onStand();
+  } else {
+    messageEl.innerText = "你要牌了。";
+  }
+}
+
+// 玩家按 Stand
+function onStand(){
+  if(!inRound) return;
+  hitBtn.disabled = true;
+  standBtn.disabled = true;
+  messageEl.innerText = "莊家補牌中...";
+  // 揭露莊家暗牌並讓莊家依規則補牌
+  renderHands(false);
+  setTimeout(()=> dealerPlay(), 800);
+}
+
+// 莊家補牌規則
+function dealerPlay(){
+  let dVal = calcHandValue(dealerHand);
+  // 莊家在 16 或更小要補牌，17（包含軟 17）則停（此為簡化規則）
+  while(dVal < 17){
+    dealerHand.push(draw());
+    renderHands(false);
+    dVal = calcHandValue(dealerHand);
+  }
+  // 判定輸贏
+  const pVal = calcHandValue(playerHand);
+  if(dVal > 21){
+    endRound("dealer_bust");
+  } else {
+    // 比較大小
+    if(pVal > dVal) endRound("player_win");
+    else if(pVal < dVal) endRound("dealer_win");
+    else endRound("push");
+  }
+}
+
+// 結束回合
+function endRound(code){
+  inRound = false;
+  hitBtn.disabled = true;
+  standBtn.disabled = true;
+  dealBtn.disabled = false;
+  renderHands(false);
+  let resultText = "";
+  let payout = 0;
+
+  switch(code){
+    case "player_blackjack":
+      // Blackjack 1.5x：贏得下注 * 1.5（含本金）
+      payout = Math.floor(currentBet * 2.5); // 回傳包含本金。注意：這裡用整數 math。實務可用小數。
+      balance += payout;
+      resultText = `玩家 Blackjack！贏得 $${payout} (含本金)。`;
+      pushHistory("Blackjack", currentBet, payout, "player");
+      break;
+    case "dealer_blackjack":
+      resultText = "莊家 Blackjack，玩家輸。";
+      pushHistory("Dealer Blackjack", currentBet, 0, "dealer");
+      break;
+    case "player_bust":
+      resultText = "玩家點數爆掉 (Bust)，玩家輸。";
+      pushHistory("Player Bust", currentBet, 0, "dealer");
+      break;
+    case "dealer_bust":
+      payout = currentBet * 2;
+      balance += payout;
+      resultText = `莊家爆掉，玩家贏！獲得 $${payout}`;
+      pushHistory("Dealer Bust", currentBet, payout, "player");
+      break;
+    case "player_win":
+      payout = currentBet * 2;
+      balance += payout;
+      resultText = `玩家點數較高，玩家贏！獲得 $${payout}`;
+      pushHistory("Player Win", currentBet, payout, "player");
+      break;
+    case "dealer_win":
+      resultText = "莊家點數較高，玩家輸。";
+      pushHistory("Dealer Win", currentBet, 0, "dealer");
+      break;
+    case "push":
+      // 平手，退還下注
+      balance += currentBet;
+      resultText = "平手 (Push)，退還下注。";
+      pushHistory("Push", currentBet, currentBet, "push");
+      break;
+    default:
+      resultText = "未知結果";
+      break;
+  }
+
+  currentBet = 0;
+  updateBalanceUI();
+  messageEl.innerText = resultText;
+}
+
+// 推送到歷史紀錄（畫面）
+function pushHistory(title, bet, payout, winner){
+  const el = document.createElement("div");
+  const cls = winner === "player" ? "win" : (winner==="dealer" ? "lose" : "push");
+  el.innerHTML = `<strong class="${cls}">${title}</strong> — 下注 $${bet}，結果 $${payout}`;
+  historyList.prepend(el);
+}
+
+// 更新餘額顯示
+function updateBalanceUI(){
+  balanceChip.innerText = `餘額 $${balance}`;
+  // 儲存 LocalStorage（簡易保持）
+  localStorage.setItem("bj_balance", String(balance));
+}
+
+// 重置（恢復初始）
+function onReset(){
+  if(!confirm("確定要重置遊戲？這會把餘額回到 1000。")) return;
+  balance = 1000;
+  round = 0;
+  historyList.innerHTML = "";
+  playerHand = [];
+  dealerHand = [];
+  deck = [];
+  shuffleDeck();
+  updateBalanceUI();
+  renderHands(false);
+  messageEl.innerText = "遊戲已重置。";
+  roundCount.innerText = "0";
+}
+
+// 頁面載入時嘗試讀取 LocalStorage（金額）
+window.addEventListener("load", ()=>{
+  const saved = Number(localStorage.getItem("bj_balance") || "0");
+  if(saved > 0) balance = saved;
+  updateBalanceUI();
+  renderHands(false);
+});
+</script>
+
+</body>
+</html>
