@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>麻將四方位對打</title>
+<style>
+  body {
+    background-color: #006400;
+    color: white;
+    font-family: "微軟正黑體";
+    text-align: center;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+  }
+
+  #table {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+  }
+
+  .player-hand, .opponent-hand {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: nowrap;
+  }
+
+  .player-hand {
+    position: absolute;
+    bottom: 70px; /* 👈 往上移動，讓手機螢幕不擋 */
+    width: 100%;
+    z-index: 3;
+  }
+
+  .opponent-hand.top {
+    position: absolute;
+    top: 20px;
+    width: 100%;
+  }
+
+  .opponent-hand.left {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    flex-direction: column;
+  }
+
+  .opponent-hand.right {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    flex-direction: column;
+  }
+
+  .tile {
+    width: 42px;
+    height: 66px;
+    background-color: white;
+    color: black;
+    border-radius: 5px;
+    border: 1px solid #aaa;
+    margin: 2px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 16px;
+    cursor: pointer;
+  }
+
+  .hidden-tile {
+    background-color: #444;
+  }
+
+  #discard-area {
+    position: absolute;
+    top: 48%;
+    left: 50%;
+    width: 340px;
+    height: 180px;
+    background-color: rgba(0,0,0,0.15);
+    transform: translate(-50%, -50%);
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    border-radius: 10px;
+    padding: 5px;
+    z-index: 1;
+  }
+
+  #melds {
+    position: absolute;
+    bottom: 150px;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    z-index: 2;
+  }
+
+  .meld {
+    display: flex;
+    margin: 5px;
+  }
+
+  button {
+    background-color: gold;
+    border: none;
+    padding: 10px;
+    margin: 10px;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+  }
+
+  @media (max-width: 768px) {
+    .tile {
+      width: 36px;
+      height: 56px;
+      font-size: 14px;
+    }
+    .player-hand { bottom: 90px; }
+  }
+</style>
+</head>
+<body>
+<h2>麻將四方位對打模擬</h2>
+<div id="table">
+  <div class="opponent-hand top" id="north"></div>
+  <div class="opponent-hand left" id="west"></div>
+  <div class="opponent-hand right" id="east"></div>
+  <div id="discard-area"></div>
+  <div id="melds"></div>
+  <div class="player-hand" id="south"></div>
+</div>
+
+<script>
+const suits = ["萬", "條", "餅"];
+const winds = ["東", "南", "西", "北"];
+let deck = [];
+
+// 建立 136 張牌
+for (let s of suits) {
+  for (let n = 1; n <= 9; n++) {
+    for (let i = 0; i < 4; i++) deck.push(`${n}${s}`);
+  }
+}
+for (let w of winds) {
+  for (let i = 0; i < 4; i++) deck.push(`${w}風`);
+}
+
+// 洗牌
+deck.sort(() => Math.random() - 0.5);
+
+// 四家牌組
+let players = {
+  east: [],
+  south: [],
+  west: [],
+  north: []
+};
+
+function drawTile(p) {
+  if (deck.length > 0) players[p].push(deck.pop());
+}
+
+// 發牌（每家 16 張）
+["east", "south", "west", "north"].forEach(p => {
+  for (let i = 0; i < 16; i++) drawTile(p);
+});
+
+// 排序手牌
+function sortHand(hand) {
+  return hand.sort((a,b)=>{
+    const order = "萬條餅風";
+    if (a[a.length-1] === b[b.length-1])
+      return parseInt(a) - parseInt(b);
+    return order.indexOf(a[a.length-1]) - order.indexOf(b[b.length-1]);
+  });
+}
+players.south = sortHand(players.south);
+
+const discardArea = document.getElementById("discard-area");
+const meldsArea = document.getElementById("melds");
+
+// 顯示玩家手牌
+function renderHands() {
+  document.getElementById("south").innerHTML = "";
+  players.south.forEach((tile, i) => {
+    const div = document.createElement("div");
+    div.className = "tile";
+    div.innerText = tile;
+    div.onclick = () => discardTile("south", i);
+    document.getElementById("south").appendChild(div);
+  });
+
+  // 東南西北隱藏牌
+  ["north","west","east"].forEach(dir => {
+    const area = document.getElementById(dir);
+    area.innerHTML = "";
+    players[dir].forEach(_=>{
+      const div = document.createElement("div");
+      div.className = "tile hidden-tile";
+      area.appendChild(div);
+    });
+  });
+}
+
+function discardTile(player, index) {
+  const tile = players[player].splice(index, 1)[0];
+  const div = document.createElement("div");
+  div.className = "tile";
+  div.innerText = tile;
+  discardArea.appendChild(div);
+  checkMeld(tile);
+  renderHands();
+  setTimeout(aiTurn, 1000);
+}
+
+// 檢查吃碰槓
+function checkMeld(tile) {
+  const chance = Math.random();
+  if (chance < 0.25) {
+    const meldDiv = document.createElement("div");
+    meldDiv.className = "meld";
+    const kind = chance < 0.08 ? "槓" : (chance < 0.16 ? "碰" : "吃");
+    meldDiv.innerHTML = `${kind}: 
+      <div class="tile">${tile}</div>
+      <div class="tile">${tile}</div>
+      <div class="tile">${tile}</div>`;
+    meldsArea.appendChild(meldDiv);
+  }
+}
+
+// AI 出牌
+function aiTurn() {
+  ["east","north","west"].forEach(p=>{
+    if (players[p].length > 0) {
+      const idx = Math.floor(Math.random()*players[p].length);
+      const tile = players[p].splice(idx,1)[0];
+      const div = document.createElement("div");
+      div.className = "tile";
+      div.innerText = tile;
+      discardArea.appendChild(div);
+      checkMeld(tile);
+    }
+  });
+  renderHands();
+}
+
+// 初始畫面
+renderHands();
+</script>
+</body>
+</html>
