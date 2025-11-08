@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>麻將模擬桌面（可手動出牌）</title>
+<style>
+  body {
+    background: radial-gradient(circle, #0f4c1a 50%, #063d13 100%);
+    font-family: "微軟正黑體";
+    color: white;
+    margin: 0;
+    overflow: hidden;
+    text-align: center;
+  }
+  h1 {
+    margin-top: 8px;
+    color: gold;
+    font-size: 1.6em;
+  }
+  .table {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+  }
+  .player {
+    position: absolute;
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: center;
+    align-items: center;
+  }
+  .tile {
+    width: 45px;
+    height: 70px;
+    margin: 2px;
+    background: white;
+    border-radius: 6px;
+    color: black;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+    font-size: 1.1em;
+    box-shadow: 1px 1px 3px rgba(0,0,0,0.6);
+    cursor: pointer;
+    transition: transform 0.2s;
+  }
+  .tile:hover {
+    transform: translateY(-8px);
+  }
+  /* 玩家位置 */
+  #player-bottom {
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+  #player-top {
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%) rotate(180deg);
+  }
+  #player-left {
+    left: 10px;
+    top: 50%;
+    flex-direction: column;
+    transform: translateY(-50%);
+  }
+  #player-right {
+    right: 10px;
+    top: 50%;
+    flex-direction: column;
+    transform: translateY(-50%);
+  }
+  /* 出牌區 */
+  #discard-area {
+    position: absolute;
+    top: 48%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 6px;
+  }
+  .discard-tile {
+    width: 38px;
+    height: 60px;
+    background: #eee;
+    border-radius: 6px;
+    color: black;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+    font-size: 0.9em;
+    box-shadow: 1px 1px 2px rgba(0,0,0,0.4);
+  }
+  /* 狀態與結果 */
+  .turn-indicator {
+    position: absolute;
+    top: 45%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 1.3em;
+    background: rgba(255, 215, 0, 0.9);
+    color: #000;
+    padding: 10px 20px;
+    border-radius: 12px;
+    box-shadow: 0 0 8px #ff0;
+  }
+  .result {
+    position: absolute;
+    top: 60%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(255, 255, 255, 0.9);
+    color: red;
+    font-size: 1.6em;
+    padding: 12px 20px;
+    border-radius: 12px;
+    font-weight: bold;
+    display: none;
+    box-shadow: 0 0 10px red;
+  }
+</style>
+</head>
+<body>
+  <h1>麻將模擬桌面（玩家可自行打牌）</h1>
+
+  <div class="table">
+    <!-- 東家 -->
+    <div class="player" id="player-top"></div>
+
+    <!-- 南家 -->
+    <div class="player" id="player-right"></div>
+
+    <!-- 西家 -->
+    <div class="player" id="player-left"></div>
+
+    <!-- 北家（自己） -->
+    <div class="player" id="player-bottom"></div>
+
+    <!-- 出牌區 -->
+    <div id="discard-area"></div>
+
+    <!-- 輪到提示 -->
+    <div class="turn-indicator" id="turn">輪到你出牌</div>
+
+    <!-- 胡牌結果 -->
+    <div class="result" id="result"></div>
+  </div>
+
+<script>
+  const tiles = ["1萬","2萬","3萬","4萬","5萬","6萬","7萬","8萬","9萬",
+                 "1筒","2筒","3筒","4筒","5筒","6筒","7筒","8筒","9筒",
+                 "1條","2條","3條","4條","5條","6條","7條","8條","9條",
+                 "東","南","西","北","中","發","白"];
+
+  const players = {
+    bottom: [], top: [], left: [], right: []
+  };
+  const discardArea = document.getElementById("discard-area");
+  const turnEl = document.getElementById("turn");
+  const resultEl = document.getElementById("result");
+  let turn = "bottom"; // 起始由玩家出牌
+
+  function randomTile() {
+    return tiles[Math.floor(Math.random() * tiles.length)];
+  }
+
+  function drawTiles() {
+    for (let i = 0; i < 13; i++) {
+      players.bottom.push(randomTile());
+      players.top.push(randomTile());
+      players.left.push(randomTile());
+      players.right.push(randomTile());
+    }
+    renderHands();
+  }
+
+  function renderHands() {
+    for (let pos in players) {
+      const div = document.getElementById(`player-${pos}`);
+      div.innerHTML = "";
+      players[pos].forEach((tile, i) => {
+        const el = document.createElement("div");
+        el.className = "tile";
+        el.textContent = tile;
+        if (pos === "bottom" && turn === "bottom") {
+          el.onclick = () => playerPlay(i);
+        }
+        div.appendChild(el);
+      });
+    }
+  }
+
+  function playerPlay(i) {
+    const tile = players.bottom.splice(i, 1)[0];
+    addDiscard("你", tile);
+    nextTurn("top");
+  }
+
+  function addDiscard(who, tile) {
+    const el = document.createElement("div");
+    el.className = "discard-tile";
+    el.textContent = tile;
+    discardArea.appendChild(el);
+    turnEl.textContent = `${who} 打出 ${tile}`;
+  }
+
+  function nextTurn(next) {
+    turn = next;
+    renderHands();
+    if (next !== "bottom") {
+      setTimeout(() => {
+        computerPlay(next);
+      }, 2000);
+    } else {
+      turnEl.textContent = "輪到你出牌";
+    }
+  }
+
+  function computerPlay(who) {
+    const hand = players[who];
+    const i = Math.floor(Math.random() * hand.length);
+    const tile = hand.splice(i, 1)[0];
+    addDiscard(who, tile);
+
+    // 模擬簡單胡牌機率
+    if (Math.random() < 0.1) {
+      showResult(`${who} 胡了！`);
+      return;
+    }
+
+    // 輪轉順序
+    if (who === "top") nextTurn("left");
+    else if (who === "left") nextTurn("right");
+    else if (who === "right") nextTurn("bottom");
+  }
+
+  function showResult(text) {
+    resultEl.textContent = text;
+    resultEl.style.display = "block";
+    turnEl.style.display = "none";
+  }
+
+  drawTiles();
+</script>
+</body>
+</html>
