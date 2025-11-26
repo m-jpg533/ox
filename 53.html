@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>聚會影片</title>
+
+  <!-- ★★★ 這段就是讓 LINE 出現卡片的關鍵 ★★★ -->
+  <meta property="og:title" content="聚會影片">
+  <meta property="og:description" content="點擊查看聚會精彩畫面！">
+  <meta property="og:image" content="https://m-jpg533.github.io/ox/13.png">
+  <meta property="og:type" content="video.other">
+  <meta property="og:video" content="https://m-jpg533.github.io/ox/53.mp4">
+  <meta property="og:video:type" content="video/mp4">
+  <meta property="og:video:width" content="720">
+  <meta property="og:video:height" content="1280">
+  <!-- ★★★ 結束 ★★★ -->
+
+  <style>
+    body {
+      background: black;
+      color: white;
+      font-family: sans-serif;
+      text-align: center;
+      margin: 0;
+    }
+    video {
+      width: 90%;
+      max-width: 600px;
+      margin-top: 40px;
+      border-radius: 12px;
+    }
+    .btn {
+      background: red;
+      color: white;
+      padding: 16px 32px;
+      border-radius: 12px;
+      text-decoration: none;
+      margin-top: 20px;
+      display: inline-block;
+      font-size: 20px;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>聚會影片</h1>
+  <video controls src="https://m-jpg533.github.io/ox/27.mp4"></video>
+  <br>
+  <a class="btn" href="https://m-jpg533.github.io/ox/27.mp4" download>下載影片</a>
+</body>
+</html>
