@@ -1,0 +1,256 @@
+<!-- <!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>名曲精選</title>
+
+<style>
+    body {
+        margin: 0;
+        padding: 20px;
+        background: #111;
+        font-family: "Microsoft JhengHei", sans-serif;
+        color: white;
+        text-align: center;
+    }
+
+    h1 {
+        font-size: 34px;
+        margin-bottom: 30px;
+        letter-spacing: 2px;
+    }
+
+    .song-container {
+        display: flex;
+        justify-content: center;
+        gap: 30px;
+        flex-wrap: wrap;
+    }
+
+    .song-card {
+        width: 220px;
+        position: relative;
+    }
+
+    .circle-video {
+        width: 220px;
+        height: 220px;
+        border-radius: 50%;
+        overflow: hidden;
+        border: 4px solid #ffcc00;
+        cursor: pointer;
+        background: black;
+        position: relative;
+    }
+
+    video {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 50%;
+    }
+
+    /* ▶ 播放箭頭樣式 */
+    .play-btn {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 60px;
+        color: white;
+        opacity: 0.8;
+        pointer-events: none;
+    }
+
+    .song-title {
+        margin-top: 10px;
+        font-size: 20px;
+        font-weight: bold;
+    }
+</style>
+
+</head>
+<body>
+
+<h1>名曲精選</h1>
+
+<div class="song-container">
+
+    <!-- 第 1 首：用戶點擊播放、帶箭頭 -->
+    <div class="song-card">
+        <div class="circle-video" onclick="playFirst()">
+            <video id="v1" src="https://m-jpg533.github.io/pp/55.mp4"></video>
+            <div id="btn1" class="play-btn">▶</div>
+        </div>
+        <div class="song-title">火車要開</div>
+    </div>
+
+    <!-- 第 2 首：自動播放，無箭頭 -->
+    <div class="song-card">
+        <div class="circle-video">
+            <video id="v2" src="https://m-jpg533.github.io/pp/compressed_58.mp4"></video>
+        </div>
+        <div class="song-title">鴦鴦溪鴦鴦溪</div>
+    </div>
+
+    <!-- 第 3 首：自動播放，無箭頭 -->
+    <div class="song-card">
+        <div class="circle-video">
+            <video id="v3" src="https://m-jpg533.github.io/pp/compressed_57.mp4"></video>
+        </div>
+        <div class="song-title">光明</div>
+    </div>
+
+</div>
+
+<script>
+function playFirst() {
+    let v1 = document.getElementById("v1");
+    let btn1 = document.getElementById("btn1");
+
+    v1.play();
+    btn1.style.display = "none"; // 播放箭頭消失
+}
+
+// 第 1 首播放完 → 播第 2 首
+document.getElementById("v1").addEventListener("ended", function() {
+    document.getElementById("v2").play();
+});
+
+// 第 2 首播放完 → 播第 3 首
+document.getElementById("v2").addEventListener("ended", function() {
+    document.getElementById("v3").play();
+});
+</script>
+
+</body>
+</html>
+ -->
+
+
+
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>名曲精選</title>
+
+<style>
+    body {
+        margin: 0;
+        padding: 20px;
+        background: #111;
+        font-family: "Microsoft JhengHei", sans-serif;
+        color: white;
+        text-align: center;
+    }
+
+    h1 {
+        font-size: 34px;
+        margin-bottom: 30px;
+        letter-spacing: 2px;
+    }
+
+    .song-container {
+        display: flex;
+        justify-content: center;
+        gap: 30px;
+        flex-wrap: wrap;
+    }
+
+    .song-card {
+        width: 220px;
+    }
+
+    .circle-video {
+        width: 220px;
+        height: 220px;
+        border-radius: 50%;
+        overflow: hidden;
+        border: 4px solid #ffcc00;
+        cursor: pointer;
+        position: relative;
+        background: black;
+    }
+
+    .circle-video video {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    /* 播放箭頭按鈕 */
+    .play-icon {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 60px;
+        color: white;
+        pointer-events: none;
+        opacity: 0.8;
+        transition: opacity 0.3s;
+    }
+
+    .song-title {
+        margin-top: 10px;
+        font-size: 20px;
+        font-weight: bold;
+    }
+</style>
+
+<script>
+function togglePlay(id) {
+    let video = document.getElementById(id);
+    let icon = document.getElementById(id + "-icon");
+
+    if (video.paused) {
+        video.play();
+        icon.style.opacity = "0";
+    } else {
+        video.pause();
+        icon.style.opacity = "0.8";
+    }
+}
+</script>
+
+</head>
+<body>
+
+<h1>名曲精選</h1>
+
+<div class="song-container">
+
+    <!-- 第 1 首 -->
+    <div class="song-card">
+        <div class="circle-video" onclick="togglePlay('v1')">
+            <video id="v1" src="https://m-jpg533.github.io/pp/55.mp4"></video>
+            <div class="play-icon" id="v1-icon">▶</div>
+        </div>
+        <div class="song-title">飛快車</div>
+    </div>
+
+    <!-- 第 2 首 -->
+    <div class="song-card">
+        <div class="circle-video" onclick="togglePlay('v2')">
+            <video id="v2" src="https://m-jpg533.github.io/pp/compressed_58.mp4"></video>
+            <div class="play-icon" id="v2-icon">▶</div>
+        </div>
+        <div class="song-title">鴦鴦溪</div>
+    </div>
+
+    <!-- 第 3 首 -->
+    <div class="song-card">
+        <div class="circle-video" onclick="togglePlay('v3')">
+            <video id="v3" src="https://m-jpg533.github.io/pp/compressed_57.mp4"></video>
+            <div class="play-icon" id="v3-icon">▶</div>
+        </div>
+        <div class="song-title">光明</div>
+    </div>
+
+</div>
+
+</body>
+</html>
