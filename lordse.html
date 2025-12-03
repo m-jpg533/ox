@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>敬拜歌字幕卡片</title>
+<style>
+body {
+  background: #000;
+  margin: 0;
+  padding: 30px;
+  font-family: 'Microsoft JhengHei', sans-serif;
+  color: #fff;
+  text-align: center;
+}
+
+.card {
+  width: 320px;
+  margin: 30px auto;
+  border: 2px solid #444;
+  border-radius: 14px;
+  overflow: hidden;
+  background: #111;
+  box-shadow: 0 0 12px rgba(255,255,255,0.15);
+}
+
+.card iframe {
+  width: 100%;
+  height: 180px;
+  border: 0;
+}
+
+.card-content {
+  padding: 12px 14px;
+  min-height: 260px;
+}
+
+.card-content h3 {
+  margin: 0 0 10px;
+  font-size: 20px;
+}
+
+.subtitle {
+  font-size: 15px;
+  line-height: 1.6;
+  color: #ffdd88;
+  text-align: left;
+  white-space: pre-wrap;
+  min-height: 200px;
+}
+
+.cursor {
+  display: inline-block;
+  width: 2px;
+  background: #ffdd88;
+  animation: blink 1s step-start infinite;
+  vertical-align: bottom;
+}
+
+@keyframes blink {
+  0%,50%,100% { opacity: 1; }
+  25%,75% { opacity: 0; }
+}
+</style>
+</head>
+<body>
+
+<h1>字幕卡片</h1>
+<h2>大阪之女</h2>
+
+<div class="card">
+  <iframe src="https://www.youtube.com/embed/qiI8sDkbmfQ"
+    title="YouTube video player"
+    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+    allowfullscreen></iframe>
+
+  <div class="card-content">
+    <h3>（打字顯示）</h3>
+    <div class="subtitle" id="subtitle"></div>
+  </div>
+</div>
+
+<script>
+// ★ 中文歌詞（逐句打字） ★
+const lines = [
+  "走在熟悉的小路上，我又想起你落淚的模樣。",
+  "這旋律唱著你的名字，像你在我心裡的節拍。",
+  "你說想飛向遠方，去追逐屬於你的天空。",
+  "而你啊，就像一首詩，我愛得像個寫詩的人。",
+  "[音樂間奏]",
+
+  "你的甜笑如陽光，有時溫暖、有時刺痛我的胸口。",
+  "你說的每句話，我都錄在心底，不是故意，只是太愛。",
+  "在你的懷抱裡，我亂了心、亂了情，只剩滿滿的想念。",
+  "沒有你的日子，整個世界都變得空白。",
+  "[音樂間奏]",
+
+  "那首舊歌，我依然一個人唱著，好像這樣就能贏過寂寞。",
+  "你說「開玩笑啦」，可我卻認真到永遠。",
+  "所以我才會坦白，把心裡話都唱給你聽。",
+  "在房間裡想著你，等著有一天你會回到我身邊。"
+];
+
+const subtitleDiv = document.getElementById('subtitle');
+let lineIndex = 0;
+let charIndex = 0;
+
+function type() {
+  if (lineIndex < lines.length) {
+    const line = lines[lineIndex];
+
+    subtitleDiv.innerHTML =
+      lines.slice(0, lineIndex).join('\n') +
+      (lineIndex > 0 ? '\n' : '') +
+      line.slice(0, charIndex) +
+      '<span class="cursor"></span>';
+
+    charIndex++;
+
+    if (charIndex <= line.length) {
+      setTimeout(type, 925);  // 打字速度
+    } else {
+      charIndex = 0;
+      lineIndex++;
+      setTimeout(type, 300);
+    }
+  } else {
+    subtitleDiv.innerHTML = lines.join('\n');
+  }
+}
+
+type(); // 開始打字
+</script>
+
+</body>
+</html>
