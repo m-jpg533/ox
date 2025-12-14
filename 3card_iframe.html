@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>名曲牆播放器</title>
+
+<style>
+body {
+  margin: 0;
+  background: #0b0f14;
+  font-family: "Microsoft JhengHei", sans-serif;
+  color: white;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ===== 播放區 ===== */
+.player {
+  position: relative;
+  width: 100%;
+  height: 40vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: radial-gradient(circle at center, #1a2330, #000);
+}
+
+iframe {
+  width: 360px;
+  height: 360px;
+  border-radius: 20px;
+  border: none;
+  opacity: 0;
+  transform: scale(0.96);
+  transition: opacity 1s ease, transform 1s ease;
+}
+
+iframe.show {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* ===== 名曲牆 ===== */
+.wall {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 18px;
+  padding: 20px;
+}
+
+.card {
+  background: linear-gradient(145deg, #1c2533, #0f141d);
+  border-radius: 16px;
+  padding: 14px;
+  cursor: pointer;
+  box-shadow: 0 0 0 rgba(0,0,0,0);
+  transition: transform .25s, box-shadow .25s;
+}
+
+.card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 0 25px rgba(0,200,255,.35);
+}
+
+.card-title {
+  margin-top: 10px;
+  text-align: center;
+  font-size: 16px;
+}
+</style>
+</head>
+
+<body>
+
+<!-- 播放器 -->
+<div class="player">
+  <iframe id="yt" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+</div>
+
+<!-- 名曲牆 -->
+<div class="wall">
+  <div class="card" onclick="playVideo('jPRJSnRfvdo')">
+    <div class="card-title">人生抒情曲</div>
+  </div>
+
+  <div class="card" onclick="playVideo('fNRyTj8Lg2k')">
+    <div class="card-title">經典名曲</div>
+  </div>
+
+  <div class="card" onclick="playVideo('vGSqzbx8wus')">
+    <div class="card-title">回憶旋律</div>
+  </div>
+</div>
+
+<script>
+const yt = document.getElementById("yt");
+
+function playVideo(id) {
+
+  // 先淡出
+  yt.classList.remove("show");
+
+  // 停一點點再換影片（避免閃屏）
+  setTimeout(() => {
+
+    // ✔ 正確 iframe 組法（重點）
+    yt.src = "https://www.youtube.com/embed/" + id + "?autoplay=1&mute=0";
+
+    // 再淡入
+    setTimeout(() => {
+      yt.classList.add("show");
+    }, 100);
+
+  }, 300);
+}
+</script>
+
+</body>
+</html>
