@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>名曲牆 Shorts 播放器</title>
+
+<meta property="og:title" content="名曲 Shorts 播放牆">
+<meta property="og:description" content="點哪首播哪首｜霓虹・療癒・科幻">
+<meta property="og:image" content="https://i.imgur.com/8Km9tLL.jpg">
+
+<style>
+html,body{
+  margin:0;
+  height:100%;
+  background:#000;
+  font-family:"Microsoft JhengHei";
+  overflow:hidden;
+}
+
+/* ===== 模式背景 ===== */
+body.neon{background:radial-gradient(circle,#ff00ff,#000);}
+body.heal{background:linear-gradient(#0f2027,#2c5364);}
+body.sci{background:radial-gradient(circle,#00f,#000);}
+
+/* ===== 播放區 ===== */
+#player{
+  position:relative;
+  width:100%;
+  height:70vh;
+}
+iframe{
+  width:100%;
+  height:100%;
+  border:0;
+}
+
+/* ===== 遮罩 ===== */
+#overlay{
+  display:none;
+  position:absolute;
+  inset:0;
+  background:rgba(0,0,0,.85);
+  color:#fff;
+  align-items:center;
+  justify-content:center;
+  font-size:22px;
+  z-index:5;
+}
+
+/* ===== 時鐘 ===== */
+#clock{
+  position:absolute;
+  top:10px;
+  right:10px;
+  width:120px;
+  height:120px;
+  border:3px solid #fff;
+  border-radius:50%;
+}
+.num{
+  position:absolute;
+  color:#fff;
+  font-size:14px;
+  transform:translate(-50%,-50%);
+}
+.hand{
+  position:absolute;
+  width:50%;
+  height:2px;
+  top:50%;
+  left:50%;
+  transform-origin:0%;
+}
+.hour{background:#ff0;height:4px;}
+.min{background:#0ff;}
+.sec{background:#f00;height:1px;}
+
+/* ===== 模式按鈕 ===== */
+#modes{
+  display:flex;
+  justify-content:space-around;
+  padding:8px;
+  z-index:10;
+}
+#modes button{
+  border:none;
+  padding:6px 14px;
+  border-radius:20px;
+}
+
+/* ===== 名曲牆 ===== */
+#songs{
+  display:flex;
+  overflow-x:auto;
+  gap:10px;
+  padding:10px;
+}
+.song{
+  min-width:120px;
+  background:#111;
+  color:#fff;
+  padding:8px;
+  border-radius:10px;
+  text-align:center;
+  cursor:pointer;
+}
+</style>
+</head>
+
+<body class="neon">
+
+<div id="player">
+  <iframe id="yt" allow="autoplay; encrypted-media"></iframe>
+  <div id="overlay">播放結束<br>點下一首</div>
+
+  <!-- 時鐘 -->
+  <div id="clock">
+    <div id="h" class="hand hour"></div>
+    <div id="m" class="hand min"></div>
+    <div id="s" class="hand sec"></div>
+  </div>
+</div>
+
+<!-- 模式切換 -->
+<div id="modes">
+  <button onclick="setMode('neon')">霓虹</button>
+  <button onclick="setMode('heal')">療癒</button>
+  <button onclick="setMode('sci')">科幻</button>
+</div>
+
+<!-- 名曲牆 -->
+<div id="songs">
+  <div class="song" onclick="play('bKe8eohEfTQ')">名曲 1</div>
+  <div class="song" onclick="play('/llXoJZyfySg')">名曲 2</div>
+  <div class="song" onclick="play('s8qTWtrTUVk')">名曲 3</div>
+</div>
+
+<script>
+/* ===== 播放 ===== */
+function play(id){
+  document.getElementById('overlay').style.display='none';
+  document.getElementById('yt').src =
+    `https://www.youtube.com/embed/${id}?playsinline=1&rel=0`;
+}
+
+/* ===== 模式 ===== */
+function setMode(m){
+  document.body.className=m;
+}
+
+/* ===== 時鐘 ===== */
+const nums=[1,2,3,4,5,6,7,8,9,10,11,12];
+nums.forEach((n,i)=>{
+  let d=document.createElement('div');
+  d.className='num';
+  d.innerText=n;
+  let a=(i/12)*Math.PI*2;
+  d.style.left=60+50*Math.sin(a)+'px';
+  d.style.top=60-50*Math.cos(a)+'px';
+  document.getElementById('clock').appendChild(d);
+});
+
+setInterval(()=>{
+  let t=new Date();
+  let h=t.getHours()%12;
+  document.getElementById('h').style.transform=
+    `rotate(${h*30+t.getMinutes()/2}deg)`;
+  document.getElementById('m').style.transform=
+    `rotate(${t.getMinutes()*6}deg)`;
+  document.getElementById('s').style.transform=
+    `rotate(${t.getSeconds()*6}deg)`;
+},1000);
+</script>
+
+</body>
+</html>
