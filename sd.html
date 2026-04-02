@@ -1,340 +1,205 @@
-<!-- <!DOCTYPE html>
+
+<!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>捷運跑馬燈 + 雙語報站</title>
-  <style>
-    body {
-      margin: 0;
-      padding: 0;
-      background: black;
-      color: yellow;
-      font-family: "Microsoft JhengHei", sans-serif;
-      overflow: hidden;
-      text-align: center;
-    }
-    .train {
-      position: relative;
-      width: 100%;
-      height: 100vh;
-      background: url("http://www.pngmart.com/files/7/Train-Rail-PNG-Picture.png") no-repeat center;
-      background-size: cover;
-    }
-    .marquee-container {
-      position: absolute;
-      bottom: 30px;
-      width: 100%;
-      overflow: hidden;
-      white-space: nowrap;
-    }
-    .marquee-text {
-      display: inline-block;
-      font-size: 36px; /* 字體放大 */
-      color: yellow;
-      animation: marquee 10s linear infinite;
-    }
-    @keyframes marquee {
-      from { transform: translateX(100%); }
-      to { transform: translateX(-100%); }
-    }
-    .announce {
-      position: absolute;
-      top: 30%;
-      width: 100%;
-      font-size: 60px;
-      font-weight: bold;
-      color: red;
-      text-shadow: 2px 2px 5px black;
-      animation: flash 1.2s infinite;
-    }
-    @keyframes flash {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0; }
-    }
-    .start-btn {
-      position: absolute;
-      top: 10px;
-      left: 50%;
-      transform: translateX(-50%);
-      font-size: 24px;
-      padding: 12px 24px;
-      background: yellow;
-      color: black;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      z-index: 1000;
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🚇 台北捷運完整版</title>
+
+<style>
+body{
+  margin:0;
+  background:black;
+  color:white;
+  text-align:center;
+  font-family:Arial;
+}
+
+#startScreen{
+  position:fixed;
+  width:100%;
+  height:100%;
+  background:black;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  flex-direction:column;
+  z-index:9999;
+}
+
+#startBtn{
+  font-size:30px;
+  padding:20px 40px;
+  background:yellow;
+  border:none;
+  border-radius:12px;
+}
+
+#train-container{
+  width:95%;
+  margin:20px auto;
+  height:120px;
+  background:#222;
+  border-radius:15px;
+  overflow:hidden;
+  position:relative;
+}
+
+#train{
+  position:absolute;
+  bottom:0;
+  height:90px;
+  left:0;
+  transition: left 2s ease;
+}
+
+#marquee{
+  font-size:28px;
+  color:yellow;
+  margin-top:20px;
+}
+
+#station{
+  font-size:36px;
+  margin-top:10px;
+}
+
+#door{
+  width:200px;
+  height:120px;
+  margin:20px auto;
+  position:relative;
+  overflow:hidden;
+  border:3px solid white;
+}
+
+.door-left,.door-right{
+  position:absolute;
+  width:50%;
+  height:100%;
+  background:#ccc;
+  transition:all 1s;
+}
+
+.door-left{ left:0; }
+.door-right{ right:0; }
+
+.open .door-left{ transform:translateX(-100%); }
+.open .door-right{ transform:translateX(100%); }
+</style>
 </head>
-<body>
-  <div class="train">
-    <button id="startBtn" class="start-btn">▶ 開始模擬</button>
-    <div id="announce" class="announce">歡迎搭乘台北捷運</div>
-    <div class="marquee-container">
-      <span id="msg" class="marquee-text">🚇 歡迎搭乘捷運，下一站 淡水 / Next Stop: Tamsui</span>
-    </div>
-  </div>
 
-  <script>
-    const stations = [
-      ["淡水", "Tamsui"],
-      ["紅樹林", "Hongshulin"],
-      ["竹圍", "Zhuwei"],
-      ["關渡", "Guandu"],
-      ["忠義", "Zhongyi"],
-      ["復興崗", "Fuxinggang"],
-      ["北投", "Beitou"],
-      ["奇岩", "Qiyan"],
-      ["唭哩岸", "Qilian"],
-      ["石牌", "Shipai"],
-      ["明德", "Mingde"],
-      ["芝山", "Zhishan"],
-      ["士林", "Shilin"],
-      ["劍潭", "Jiantan"],
-      ["圓山", "Yuanshan"],
-      ["民權西路", "Minquan W. Rd."],
-      ["雙連", "Shuanglian"],
-      ["中山", "Zhongshan"],
-      ["台北車站", "Taipei Main Station"],
-      ["台大醫院", "NTU Hospital"],
-      ["中正紀念堂", "Chiang Kai-Shek Memorial Hall"],
-      ["東門", "Dongmen"],
-      ["大安森林公園", "Daan Park"],
-      ["大安", "Daan"],
-      ["信義安和", "Xinyi Anhe"],
-      ["台北101/世貿", "Taipei 101 / World Trade Center"],
-      ["象山", "Xiangshan"]
-    ];
-
-    let index = 0;
-    let direction = 1;
-    let intervalId = null;
-
-    function speakDual(ch, en) {
-      // 中文
-      let uttZh = new SpeechSynthesisUtterance(`下一站，${ch}站。`);
-      uttZh.lang = "zh-TW";
-      speechSynthesis.speak(uttZh);
-      // 英文
-      let uttEn = new SpeechSynthesisUtterance(`Next stop, ${en} station.`);
-      uttEn.lang = "en-US";
-      speechSynthesis.speak(uttEn);
-    }
-
-    function updateDisplay() {
-      const [ch, en] = stations[index];
-      const announceEl = document.getElementById("announce");
-      const msgEl = document.getElementById("msg");
-
-      announceEl.innerText = `下一站 Next Stop: ${ch} (${en})`;
-      msgEl.innerText = `🚇 歡迎搭乘捷運，下一站 ${ch} / Next Stop: ${en}`;
-
-      // 語音播報
-      speakDual(ch, en);
-
-      // 換下一站
-      index += direction;
-      if (index >= stations.length) {
-        index = stations.length - 2;
-        direction = -1;
-      }
-      if (index < 0) {
-        index = 1;
-        direction = 1;
-      }
-    }
-
-    document.getElementById("startBtn").addEventListener("click", () => {
-      if (intervalId) {
-        clearInterval(intervalId);
-      }
-      updateDisplay();  // 先播一次
-      intervalId = setInterval(updateDisplay, 6000);  // 每 6 秒換站
-      document.getElementById("startBtn").style.display = "none";
-    });
-  </script>
-</body>
-</html>
- -->
- 
- 
- 
- 
- 
- 
- <!DOCTYPE html>
-<html lang="zh-TW">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>捷運模擬報站</title>
-  <style>
-    body {
-      text-align: center;
-      font-family: Arial, sans-serif;
-      background: #f0f0f0;
-    }
-    h1 {
-      font-size: 28px;
-      margin-top: 10px;
-    }
-    #train-container {
-      width: 90%;
-      max-width: 600px;
-      margin: 20px auto;
-      position: relative;
-      height: 120px;
-      background: #e0e0e0;
-      border-radius: 15px;
-      overflow: hidden;
-    }
-    #train {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      height: 80px;
-      transition: left 2s ease-in-out;
-    }
-    #marquee {
-      font-size: 28px;
-      font-weight: bold;
-      color: #d32f2f;
-      white-space: nowrap;
-      overflow: hidden;
-      box-sizing: border-box;
-      width: 100%;
-      border-top: 2px solid #000;
-      border-bottom: 2px solid #000;
-      padding: 10px 0;
-      margin-top: 15px;
-    }
-    #marquee span {
-      display: inline-block;
-      padding-left: 100%;
-      animation: scroll 8s linear infinite;
-    }
-    @keyframes scroll {
-      from { transform: translateX(100%); }
-      to { transform: translateX(-100%); }
-    }
-    #current-station {
-      margin-top: 15px;
-      font-size: 32px;
-      font-weight: bold;
-      color: #2e3a87;
-    }
-    button {
-      font-size: 22px;
-      padding: 12px 25px;
-      margin-top: 20px;
-      border: none;
-      border-radius: 10px;
-      background-color: #4CAF50;
-      color: white;
-      cursor: pointer;
-    }
-    button:hover {
-      background-color: #45a049;
-    }
-  </style>
-</head>
 <body>
 
-  <h1>捷運模擬報站系統</h1>
+<div id="startScreen">
+  <h2>🚇 點擊開始（LINE解鎖聲音）</h2>
+  <button id="startBtn">開始</button>
+</div>
 
-  <div id="train-container">
-    <img id="train" src="https://tse1.mm.bing.net/th/id/OIP.QZNIRBu9YMuwgxewtHkGFgHaDw?pid=Api&rs=1&c=1&qlt=95&w=206&h=104" alt="捷運車廂">
-  </div>
+<h2>🚇 台北捷運模擬系統</h2>
 
-  <div id="marquee"><span>請按開始模擬</span></div>
-  <div id="current-station">🚉 目前車站：尚未開始</div>
-  <button onclick="startSimulation()">開始模擬</button>
+<div id="train-container">
+  <img id="train" src="https://tse1.mm.bing.net/th/id/OIP.QZNIRBu9YMuwgxewtHkGFgHaDw?pid=Api&rs=1&c=1">
+</div>
 
-  <script>
-    const stations = [
-      { zh: "淡水", en: "Tamsui" },
-      { zh: "紅樹林", en: "Hongshulin" },
-      { zh: "竹圍", en: "Zhuwei" },
-      { zh: "關渡", en: "Guandu" },
-      { zh: "忠義", en: "Zhongyi" },
-      { zh: "復興崗", en: "Fuxinggang" },
-      { zh: "北投", en: "Beitou" },
-      { zh: "奇岩", en: "Qiyan" },
-      { zh: "唭哩岸", en: "Qilian" },
-      { zh: "石牌", en: "Shipai" },
-      { zh: "明德", en: "Mingde" },
-      { zh: "芝山", en: "Zhishan" },
-      { zh: "士林", en: "Shilin" },
-      { zh: "劍潭", en: "Jiantan" },
-      { zh: "圓山", en: "Yuanshan" },
-      { zh: "民權西路", en: "Minquan West Rd" },
-      { zh: "雙連", en: "Shuanglian" },
-      { zh: "中山", en: "Zhongshan" },
-      { zh: "台北車站", en: "Taipei Main Station" },
-      { zh: "台大醫院", en: "NTU Hospital" },
-      { zh: "中正紀念堂", en: "Chiang Kai-Shek Memorial Hall" },
-      { zh: "東門", en: "Dongmen" },
-      { zh: "大安森林公園", en: "Daan Park" },
-      { zh: "大安", en: "Daan" },
-      { zh: "信義安和", en: "Xinyi Anhe" },
-      { zh: "象山", en: "Xiangshan" }
-    ];
+<div id="door">
+  <div class="door-left"></div>
+  <div class="door-right"></div>
+</div>
 
-    let currentIndex = 0;
-    let direction = 1;
-    let simulationRunning = false;
+<div id="marquee">請點擊開始</div>
+<div id="station">尚未開始</div>
 
-    function speak(text, lang) {
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = lang;
-      window.speechSynthesis.speak(utterance);
-    }
+<!-- 音效 -->
+<audio id="ding" src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg"></audio>
 
-    function updateMarquee(text) {
-      document.getElementById("marquee").innerHTML = "<span>" + text + "</span>";
-    }
+<script>
+const stations=[
+["淡水","Tamsui"],
+["紅樹林","Hongshulin"],
+["北投","Beitou"],
+["士林","Shilin"],
+["中山","Zhongshan"],
+["台北車站","Taipei Main"],
+["東門","Dongmen"],
+["大安","Daan"],
+["象山","Xiangshan"]
+];
 
-    function updateCurrentStation(text) {
-      document.getElementById("current-station").innerText = "🚉 目前車站：" + text;
-    }
+let i=0,dir=1,timer;
 
-    function moveTrain() {
-      const trainContainer = document.getElementById("train-container");
-      const train = document.getElementById("train");
-      const totalStations = stations.length;
-      const containerWidth = trainContainer.clientWidth;
-      const step = containerWidth / (totalStations - 1);
-      train.style.left = (currentIndex * step) + "px";
-    }
+// 解鎖聲音
+function unlock(){
+  let u=new SpeechSynthesisUtterance(" ");
+  speechSynthesis.speak(u);
+  document.getElementById("ding").play().catch(()=>{});
+}
 
-    function announceStation() {
-      const station = stations[currentIndex];
-      const announcementZh = `下一站，${station.zh}`;
-      const announcementEn = `Next station, ${station.en}`;
+// 語音
+function speak(text,lang){
+  let u=new SpeechSynthesisUtterance(text);
+  u.lang=lang;
+  speechSynthesis.speak(u);
+}
 
-      updateMarquee(announcementZh + " / " + announcementEn);
-      updateCurrentStation(station.zh + " (" + station.en + ")");
+// 移動
+function move(){
+  let w=document.getElementById("train-container").clientWidth;
+  document.getElementById("train").style.left=(i*(w/(stations.length-1)))+"px";
+}
 
-      moveTrain();
-      speak(announcementZh, "zh-TW");
-      setTimeout(() => { speak(announcementEn, "en-US"); }, 2500);
+// 開門
+function openDoor(){
+  document.getElementById("door").classList.add("open");
+}
 
-      if (currentIndex === stations.length - 1) direction = -1;
-      else if (currentIndex === 0) direction = 1;
+// 關門
+function closeDoor(){
+  document.getElementById("door").classList.remove("open");
+}
 
-      currentIndex += direction;
-    }
+// 主流程（像真的捷運）
+function nextStation(){
+  let [zh,en]=stations[i];
 
-    function startSimulation() {
-      if (!simulationRunning) {
-        simulationRunning = true;
-        announceStation();
-        setInterval(announceStation, 7000);
-      }
-    }
-  </script>
+  document.getElementById("marquee").innerText="🚇 即將到站 "+zh+" / "+en;
+  document.getElementById("station").innerText=zh+" ("+en+")";
+
+  move();
+
+  // 🔔 叮咚
+  document.getElementById("ding").play();
+
+  // 語音
+  speak("下一站 "+zh,"zh-TW");
+  setTimeout(()=>{speak("Next station "+en,"en-US");},2000);
+
+  // 開門
+  setTimeout(()=>{
+    openDoor();
+  },3500);
+
+  // 關門
+  setTimeout(()=>{
+    closeDoor();
+  },6000);
+
+  if(i==stations.length-1) dir=-1;
+  else if(i==0) dir=1;
+
+  i+=dir;
+}
+
+// 啟動
+document.getElementById("startBtn").onclick=()=>{
+  unlock();
+
+  document.getElementById("startScreen").style.display="none";
+
+  nextStation();
+  timer=setInterval(nextStation,8000);
+};
+</script>
 
 </body>
 </html>
