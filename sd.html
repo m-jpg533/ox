@@ -4,18 +4,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🚇 台北捷運完整版</title>
+<title>🚇 捷運完整版</title>
 
 <style>
-body{
-  margin:0;
-  background:black;
-  color:white;
-  text-align:center;
-  font-family:Arial;
-}
+body{margin:0;background:black;color:white;text-align:center;font-family:Arial;}
 
-#startScreen{
+#overlay{
   position:fixed;
   width:100%;
   height:100%;
@@ -27,79 +21,63 @@ body{
   z-index:9999;
 }
 
-#startBtn{
-  font-size:30px;
-  padding:20px 40px;
-  background:yellow;
+button{
+  font-size:20px;
+  padding:12px 25px;
+  margin:10px;
   border:none;
-  border-radius:12px;
+  border-radius:10px;
 }
+
+.chrome{background:#4CAF50;color:white;}
+.line{background:#ff9800;color:white;}
 
 #train-container{
   width:95%;
-  margin:20px auto;
   height:120px;
+  margin:20px auto;
   background:#222;
-  border-radius:15px;
-  overflow:hidden;
   position:relative;
+  border-radius:15px;
 }
 
 #train{
   position:absolute;
   bottom:0;
   height:90px;
-  left:0;
-  transition: left 2s ease;
-}
-
-#marquee{
-  font-size:28px;
-  color:yellow;
-  margin-top:20px;
-}
-
-#station{
-  font-size:36px;
-  margin-top:10px;
+  transition:2s;
 }
 
 #door{
-  width:200px;
-  height:120px;
-  margin:20px auto;
-  position:relative;
-  overflow:hidden;
-  border:3px solid white;
+  width:200px;height:120px;margin:20px auto;
+  border:3px solid white;overflow:hidden;position:relative;
 }
 
 .door-left,.door-right{
-  position:absolute;
-  width:50%;
-  height:100%;
-  background:#ccc;
-  transition:all 1s;
+  position:absolute;width:50%;height:100%;background:#ccc;
+  transition:1s;
 }
+.door-left{left:0;}
+.door-right{right:0;}
 
-.door-left{ left:0; }
-.door-right{ right:0; }
-
-.open .door-left{ transform:translateX(-100%); }
-.open .door-right{ transform:translateX(100%); }
+.open .door-left{transform:translateX(-100%);}
+.open .door-right{transform:translateX(100%);}
 </style>
 </head>
 
 <body>
 
-<div id="startScreen">
-  <h2>🚇 點擊開始（LINE解鎖聲音）</h2>
-  <button id="startBtn">開始</button>
+<!-- ⭐ 判斷畫面 -->
+<div id="overlay">
+  <h2 id="msg">載入中...</h2>
+  <button class="chrome" onclick="openChrome()">🚀 用Chrome開啟完整版</button>
+  <button class="line" onclick="startLite()">👉 直接在LINE執行（簡化版）</button>
 </div>
 
-<h2>🚇 台北捷運模擬系統</h2>
+<h2>🚇 捷運系統</h2>
 
 <div id="train-container">
-  <img id="train" src="https://tse1.mm.bing.net/th/id/OIP.QZNIRBu9YMuwgxewtHkGFgHaDw?pid=Api&rs=1&c=1">
+  <img id="train" src="https://tse1.mm.bing.net/th/id/OIP.QZNIRBu9YMuwgxewtHkGFgHaDw">
 </div>
 
 <div id="door">
@@ -107,98 +85,87 @@ body{
   <div class="door-right"></div>
 </div>
 
-<div id="marquee">請點擊開始</div>
-<div id="station">尚未開始</div>
+<div id="text">尚未開始</div>
 
-<!-- 音效 -->
 <audio id="ding" src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg"></audio>
 
 <script>
-const stations=[
-["淡水","Tamsui"],
-["紅樹林","Hongshulin"],
-["北投","Beitou"],
-["士林","Shilin"],
-["中山","Zhongshan"],
-["台北車站","Taipei Main"],
-["東門","Dongmen"],
-["大安","Daan"],
-["象山","Xiangshan"]
-];
+const isLine = navigator.userAgent.includes("Line");
 
-let i=0,dir=1,timer;
+document.getElementById("msg").innerText =
+  isLine ? "⚠ LINE模式（功能受限）" : "✅ 瀏覽器模式（完整版）";
 
-// 解鎖聲音
+function openChrome(){
+  window.open(location.href,"_blank");
+}
+
 function unlock(){
-  let u=new SpeechSynthesisUtterance(" ");
-  speechSynthesis.speak(u);
+  speechSynthesis.speak(new SpeechSynthesisUtterance(" "));
   document.getElementById("ding").play().catch(()=>{});
 }
 
-// 語音
-function speak(text,lang){
-  let u=new SpeechSynthesisUtterance(text);
-  u.lang=lang;
-  speechSynthesis.speak(u);
-}
+const stations=[
+["淡水","Tamsui"],["北投","Beitou"],["士林","Shilin"],
+["中山","Zhongshan"],["台北車站","Taipei"],
+["大安","Daan"],["象山","Xiangshan"]
+];
 
-// 移動
+let i=0,dir=1;
+
 function move(){
   let w=document.getElementById("train-container").clientWidth;
   document.getElementById("train").style.left=(i*(w/(stations.length-1)))+"px";
 }
 
-// 開門
-function openDoor(){
-  document.getElementById("door").classList.add("open");
+function speak(t,l){
+  let u=new SpeechSynthesisUtterance(t);
+  u.lang=l;
+  speechSynthesis.speak(u);
 }
 
-// 關門
-function closeDoor(){
-  document.getElementById("door").classList.remove("open");
-}
+function openDoor(){document.getElementById("door").classList.add("open");}
+function closeDoor(){document.getElementById("door").classList.remove("open");}
 
-// 主流程（像真的捷運）
-function nextStation(){
-  let [zh,en]=stations[i];
-
-  document.getElementById("marquee").innerText="🚇 即將到站 "+zh+" / "+en;
-  document.getElementById("station").innerText=zh+" ("+en+")";
-
-  move();
-
-  // 🔔 叮咚
-  document.getElementById("ding").play();
-
-  // 語音
-  speak("下一站 "+zh,"zh-TW");
-  setTimeout(()=>{speak("Next station "+en,"en-US");},2000);
-
-  // 開門
-  setTimeout(()=>{
-    openDoor();
-  },3500);
-
-  // 關門
-  setTimeout(()=>{
-    closeDoor();
-  },6000);
-
-  if(i==stations.length-1) dir=-1;
-  else if(i==0) dir=1;
-
-  i+=dir;
-}
-
-// 啟動
-document.getElementById("startBtn").onclick=()=>{
+function fullMode(){
   unlock();
+  startSystem(true);
+}
 
-  document.getElementById("startScreen").style.display="none";
+function startLite(){
+  startSystem(false);
+}
 
-  nextStation();
-  timer=setInterval(nextStation,8000);
-};
+function startSystem(full){
+  document.getElementById("overlay").style.display="none";
+
+  setInterval(()=>{
+    let [zh,en]=stations[i];
+    document.getElementById("text").innerText=zh+" / "+en;
+
+    move();
+
+    if(full){
+      document.getElementById("ding").play();
+      speak("下一站 "+zh,"zh-TW");
+      setTimeout(()=>speak("Next "+en,"en-US"),2000);
+      setTimeout(openDoor,3000);
+      setTimeout(closeDoor,6000);
+    }
+
+    if(i==stations.length-1) dir=-1;
+    else if(i==0) dir=1;
+
+    i+=dir;
+
+  },7000);
+}
+
+// ⭐ 自動判斷
+window.onload=()=>{
+  if(!isLine){
+    fullMode(); // Chrome直接全開
+  }
+}
 </script>
 
 </body>
