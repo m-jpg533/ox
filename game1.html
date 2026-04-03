@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>🔥 太空射擊最強版</title>
+
+<!-- LINE 分享卡 -->
+<meta property="og:title" content="🔥 太空射擊最強版">
+<meta property="og:description" content="手機震動 + 音效 + Boss戰！點我開玩">
+<meta property="og:image" content="https://i.imgur.com/3ZQ3Z3Z.png">
+<meta property="og:type" content="website">
+
+<style>
+body,html{
+  margin:0;
+  padding:0;
+  background:black;
+  overflow:hidden;
+}
+canvas{
+  display:block;
+  margin:auto;
+  background:black;
+}
+
+/* UI */
+#startBtn, #soundBtn{
+  position:absolute;
+  left:50%;
+  transform:translateX(-50%);
+  padding:15px 30px;
+  font-size:18px;
+  border:none;
+  border-radius:10px;
+}
+
+#startBtn{
+  top:45%;
+}
+
+#soundBtn{
+  top:10px;
+  left:auto;
+  right:10px;
+  transform:none;
+}
+</style>
+</head>
+
+<body>
+
+<canvas id="gameCanvas" width="360" height="640"></canvas>
+
+<button id="startBtn">🚀 開始遊戲</button>
+<button id="soundBtn">🔊</button>
+
+<!-- 音效 -->
+<audio id="bgm" src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" loop></audio>
+<audio id="shootSound" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_1e8ae3a53c.mp3"></audio>
+<audio id="hitSound" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_1e8ae3a53c.mp3"></audio>
+
+<script>
+
+const canvas = document.getElementById("gameCanvas");
+const ctx = canvas.getContext("2d");
+
+const bgm = document.getElementById("bgm");
+const shootSound = document.getElementById("shootSound");
+const hitSound = document.getElementById("hitSound");
+
+const startBtn = document.getElementById("startBtn");
+const soundBtn = document.getElementById("soundBtn");
+
+let soundOn = true;
+
+let playerX = canvas.width/2;
+let playerY = canvas.height - 50;
+
+let bullets = [];
+let enemies = [];
+
+let score = 0;
+let hp = 100;
+
+let boss = null;
+
+// 🎮 開始
+startBtn.onclick = () => {
+  startBtn.style.display = "none";
+  bgm.play().catch(()=>{});
+  gameLoop();
+};
+
+// 🔊 音效開關
+soundBtn.onclick = () => {
+  soundOn = !soundOn;
+  soundBtn.innerText = soundOn ? "🔊" : "🔇";
+  if(!soundOn) bgm.pause();
+  else bgm.play().catch(()=>{});
+};
+
+// 📳 震動
+function vibrate(p){
+  if(navigator.vibrate) navigator.vibrate(p);
+}
+
+// 👉 滑動控制
+let lastX = 0;
+
+canvas.addEventListener("touchstart", e=>{
+  lastX = e.touches[0].clientX;
+});
+
+canvas.addEventListener("touchmove", e=>{
+  let x = e.touches[0].clientX;
+  playerX += (x - lastX);
+  lastX = x;
+
+  if(playerX < 20) playerX = 20;
+  if(playerX > canvas.width-20) playerX = canvas.width-20;
+});
+
+canvas.addEventListener("touchend", ()=>{
+  bullets.push({x:playerX,y:playerY});
+  if(soundOn) shootSound.play();
+
+  vibrate(20);
+});
+
+// 👾 敵人
+setInterval(()=>{
+  enemies.push({
+    x:Math.random()*320+20,
+    y:-20,
+    speed:2
+  });
+},1000);
+
+// 👑 Boss
+setInterval(()=>{
+  if(!boss){
+    boss = {
+      x:180,
+      y:80,
+      hp:100
+    };
+  }
+},15000);
+
+// 🔄 更新
+function update(){
+
+  bullets.forEach(b=> b.y -= 6);
+  enemies.forEach(e=> e.y += e.speed);
+
+  bullets = bullets.filter(b=> b.y>0);
+  enemies = enemies.filter(e=> e.y<640);
+
+  // 💥 碰撞
+  bullets.forEach((b,bi)=>{
+    enemies.forEach((e,ei)=>{
+      if(Math.abs(b.x-e.x)<20 && Math.abs(b.y-e.y)<20){
+        enemies.splice(ei,1);
+        bullets.splice(bi,1);
+        score+=10;
+        if(soundOn) hitSound.play();
+        vibrate([50,30,50]);
+      }
+    });
+  });
+
+  // 👑 Boss碰撞
+  if(boss){
+    bullets.forEach((b,bi)=>{
+      if(Math.abs(b.x-boss.x)<40 && Math.abs(b.y-boss.y)<40){
+        boss.hp -= 5;
+        bullets.splice(bi,1);
+        vibrate(80);
+      }
+    });
+
+    if(boss.hp<=0){
+      boss=null;
+      score+=100;
+      vibrate([100,50,100,50,200]);
+    }
+  }
+
+  // 💔 被撞
+  enemies.forEach(e=>{
+    if(Math.abs(e.x-playerX)<20 && Math.abs(e.y-playerY)<20){
+      hp -= 10;
+      vibrate([100,50,100]);
+    }
+  });
+
+}
+
+// 🎨 畫面
+function draw(){
+
+  ctx.clearRect(0,0,360,640);
+
+  // 玩家
+  ctx.fillStyle="white";
+  ctx.fillRect(playerX-15,playerY-10,30,20);
+
+  // 子彈
+  ctx.fillStyle="yellow";
+  bullets.forEach(b=> ctx.fillRect(b.x-2,b.y-10,4,10));
+
+  // 敵人
+  ctx.fillStyle="red";
+  enemies.forEach(e=> ctx.fillRect(e.x-15,e.y-15,30,30));
+
+  // Boss
+  if(boss){
+    ctx.fillStyle="purple";
+    ctx.fillRect(boss.x-40,boss.y-40,80,80);
+
+    ctx.fillStyle="white";
+    ctx.fillText("Boss:"+boss.hp,boss.x-30,boss.y-50);
+  }
+
+  // UI
+  ctx.fillStyle="white";
+  ctx.fillText("分數:"+score,10,30);
+  ctx.fillText("HP:"+hp,10,60);
+
+  // GAME OVER
+  if(hp<=0){
+    ctx.fillStyle="red";
+    ctx.font="30px Arial";
+    ctx.fillText("GAME OVER",80,300);
+  }
+
+}
+
+// 🔁 主循環
+function gameLoop(){
+  update();
+  draw();
+
+  if(hp>0) requestAnimationFrame(gameLoop);
+}
+
+// 🚫 離開停止聲音
+function stopAll(){
+  document.querySelectorAll("audio").forEach(a=>{
+    a.pause();
+    a.currentTime=0;
+  });
+}
+
+document.addEventListener("visibilitychange", ()=>{
+  if(document.hidden) stopAll();
+});
+
+window.addEventListener("beforeunload", stopAll);
+
+</script>
+</body>
+</html>
