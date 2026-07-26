@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>哈佛勵志卡</title>
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+
+    background:
+    radial-gradient(circle at top,#6c757d,#343a40,#111);
+
+    font-family:"Microsoft JhengHei",sans-serif;
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+    min-height:100vh;
+
+    padding:40px;
+
+}
+
+/*==============================
+    外框
+==============================*/
+
+.card{
+
+    width:760px;
+    max-width:95%;
+
+    position:relative;
+
+    padding:18px;
+
+    border-radius:25px;
+
+    background:
+    linear-gradient(
+    135deg,
+    #3d2c08,
+    #8c6d1f,
+    #f8dd88,
+    #fff8d8,
+    #c59d33,
+    #5e4207);
+
+    box-shadow:
+
+    0 15px 35px rgba(0,0,0,.45),
+
+    inset 2px 2px 1px rgba(255,255,255,.9),
+
+    inset -2px -2px 1px rgba(0,0,0,.35),
+
+    inset 8px 8px 18px rgba(255,255,255,.45),
+
+    inset -8px -8px 18px rgba(0,0,0,.25);
+
+}
+
+/*==============================
+    玻璃光澤
+==============================*/
+
+.card::before{
+
+    content:"";
+
+    position:absolute;
+
+    left:12px;
+    right:12px;
+    top:12px;
+
+    height:45%;
+
+    border-radius:20px;
+
+    background:
+    linear-gradient(
+    rgba(255,255,255,.65),
+    rgba(255,255,255,0));
+
+    pointer-events:none;
+
+}
+
+/*==============================
+    第二層雕刻框
+==============================*/
+
+.inner{
+
+    position:relative;
+
+    background:
+    linear-gradient(#ffffff,#f7f7f7);
+
+    border-radius:18px;
+
+    padding:45px;
+
+    border:5px solid #d7b55b;
+
+    box-shadow:
+
+    inset 2px 2px 0 white,
+
+    inset -2px -2px 0 #777,
+
+    inset 10px 10px 18px rgba(255,255,255,.8),
+
+    inset -10px -10px 18px rgba(0,0,0,.08);
+
+}
+
+/*==============================
+    HARVARD
+==============================*/
+
+.logo{
+
+    text-align:center;
+
+    margin-bottom:25px;
+
+}
+
+.logo h1{
+
+    font-size:58px;
+
+    color:#7a0000;
+
+    letter-spacing:5px;
+
+    text-shadow:
+
+    1px 1px 0 white,
+
+    2px 2px 0 #f6d27f,
+
+    4px 4px 8px rgba(0,0,0,.3);
+
+}
+
+.logo h2{
+
+    font-size:26px;
+
+    color:#333;
+
+    letter-spacing:8px;
+
+}
+
+/*==============================*/
+
+.school{
+
+    text-align:center;
+
+    color:#b30000;
+
+    font-size:34px;
+
+    font-weight:bold;
+
+    margin-bottom:35px;
+
+}
+
+/*==============================*/
+
+.title{
+
+    text-align:center;
+
+    font-size:38px;
+
+    color:#d00000;
+
+    font-weight:bold;
+
+    margin-bottom:30px;
+
+    text-shadow:
+
+    1px 1px white,
+
+    2px 2px rgba(0,0,0,.15);
+
+}
+
+/*==============================*/
+
+.content{
+
+    font-size:29px;
+
+    color:#222;
+
+    line-height:1.9;
+
+}
+
+/*==============================*/
+
+.red{
+
+    color:#d10000;
+
+    font-weight:bold;
+
+}
+
+/*==============================*/
+
+.list{
+
+    margin-left:35px;
+
+    margin-top:15px;
+
+    margin-bottom:20px;
+
+}
+
+.list li{
+
+    padding:6px;
+
+    font-size:28px;
+
+}
+
+/*==============================*/
+
+.footer{
+
+    margin-top:35px;
+
+    text-align:center;
+
+    font-size:30px;
+
+    color:#006633;
+
+    font-weight:bold;
+
+}
+
+/*==============================*/
+
+.card:hover{
+
+    transform:
+
+    perspective(1000px)
+
+    rotateX(3deg)
+
+    rotateY(-3deg)
+
+    scale(1.01);
+
+    transition:.4s;
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="card">
+
+<div class="inner">
+
+<div class="logo">
+
+<h1>Zhili Business </h1>
+
+<h2>UNIVERSITY</h2>
+
+</div>
+
+<div class="school">
+
+致理大學<br>
+
+第一名畢業
+
+</div>
+
+<div class="title">
+
+🎁 送你兩句話
+
+</div>
+
+<div class="content">
+
+<span class="red">第一句：</span>
+
+人越快樂，免疫力越高。
+
+<br><br>
+
+<span class="red">第二句：</span>
+
+人 90% 的疾病都是可以自癒的。
+
+人越快樂，免疫力越高；
+
+只要一快樂，就會經脈通暢；
+
+經脈一通暢，免疫力就高了。
+
+<br><br>
+
+<span class="red">
+
+記住世界最好 5 個醫生：
+
+</span>
+
+<ol class="list">
+
+<li>☀️ 陽光</li>
+
+<li>😴 睡眠</li>
+
+<li>🏃 運動</li>
+
+<li>🥗 飲食</li>
+
+<li>❤️ 自愛</li>
+
+</ol>
+
+<span class="red">
+
+心態調好，叫格局；
+
+</span>
+
+<br>
+
+<span class="red">
+
+日子過好，叫本事。
+
+</span>
+
+</div>
+
+<div class="footer">
+
+🌸 天天好心情 天天好運 🌸
+
+</div>
+
+</div>
+
+</div>
+
+</body>
+</html>
